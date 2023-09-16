@@ -1,0 +1,51 @@
+footer.site-footer {
+    bottom: 0;
+    position: fixed;
+    right: 0;
+    width: 100%;
+    z-index:2;
+}
+#sidebar {
+    z-index: 3;
+}
+.nav-tabs {
+    border-bottom: 0px ;
+}
+
+#myTab li{
+    border-bottom: 1px solid #ddd;
+}
+#myTab .active{
+    border-bottom: 0px ;
+}
+table.table tr td,table.table tr th,.modal-title{
+    text-align: center;
+}
+.modal-body{
+    max-height:500px; 
+}
+.supplier_debit{
+    height: 27px;
+    width: 100%;
+    padding-left: 5px;
+}
+
+.delete-icon{
+    font-size:20px;
+    color:wheat;
+}
+.delete-icon:hover{
+    font-size:20px;
+    background-color: red;
+}
+
+.adv-table table.display thead th, table.display tfoot th{
+    background-color: #5b6e84;
+    color: white    
+}
+.table thead tr th{
+    border: 0px;
+}
+.table_hand{
+    cursor: pointer;
+}

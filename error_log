@@ -1,0 +1,5 @@
+[24-May-2017 16:45:09 Asia/Dhaka] PHP Parse error:  syntax error, unexpected '=>' (T_DOUBLE_ARROW) in /home/sigtranbd/public_html/kohili/account/controllers/Purchase.php on line 120
+[24-May-2017 16:45:12 Asia/Dhaka] PHP Parse error:  syntax error, unexpected '=>' (T_DOUBLE_ARROW) in /home/sigtranbd/public_html/kohili/account/controllers/Purchase.php on line 120
+[24-May-2017 16:46:27 Asia/Dhaka] PHP Parse error:  syntax error, unexpected '=>' (T_DOUBLE_ARROW) in /home/sigtranbd/public_html/kohili/account/controllers/Purchase.php on line 120
+[24-May-2017 16:46:30 Asia/Dhaka] PHP Parse error:  syntax error, unexpected '=>' (T_DOUBLE_ARROW) in /home/sigtranbd/public_html/kohili/account/controllers/Purchase.php on line 120
+[01-Jun-2017 07:03:51 Asia/Dhaka] PHP Parse error:  syntax error, unexpected ';' in /home/sigtranbd/public_html/kohili/account/views/profitloss.php on line 61
