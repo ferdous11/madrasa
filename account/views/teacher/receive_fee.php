@@ -69,7 +69,7 @@
                                         </tr>
                                         <?php $i=1;$total=0; if(!empty($assignfee)): foreach ($assignfee as $key): ?>
                                         <tr>
-                                            <td><?php echo $i++;?></td>
+                                            <td><?php echo $i;?></td>
                                             <td><?php echo $key->assign_date;?></td>
                                             <td><?php echo $key->casuse;?></td>
                                             <td  style="text-align: right;"><?php echo $key->amount;?></td>

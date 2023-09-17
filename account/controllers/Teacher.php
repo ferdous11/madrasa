@@ -349,7 +349,7 @@ class Teacher extends CI_Controller {
   			$data['sections'] = $this->db->query("select * from sections where class_id='".$data['class_id']."' and company_id='$company_id'")->result();
   			if(empty($this->input->post('section_id'))||$this->input->post('section_id')=="")
   				$data["section_id"] = 0;
-  			$data["studentlist"] = $this->db->query("select s.*,(select sum(amount)-sum(paid) from student_fee where student_id=s.id) as due,l.ledgername as name,l.address as student_address,l.father_name,l.mobile as guardian_mobile,l.image,l.status from students as s left join accountledger as l on s.ledger_id=l.id  where s.class_id=".$data["class_id"]." and l.company_id='$company_id'")->result(); 
+  			$data["studentlist"] = $this->db->query("select s.*,(select sum(amount)-sum(paid) from student_fee where student_id=s.id and step=0) as due,l.ledgername as name,l.address as student_address,l.father_name,l.mobile as guardian_mobile,l.image,l.status from students as s left join accountledger as l on s.ledger_id=l.id  where s.class_id=".$data["class_id"]." and l.company_id='$company_id'")->result(); 
 		}
 		$this->load->view('teacher/students_list',$data);
 
@@ -776,7 +776,7 @@ class Teacher extends CI_Controller {
 				$student_fee_id=$this->input->post('student_fee_id[]');
 				$maxid=count($student_fee_id);
 				
-				$message = $student->call_name.'\n';
+				$message = $student->call_name.'\r\n';
 				$randomkey = time();
 				$todate = date("Y-m-d H:i:s");
 				$updateArray = array();
@@ -789,9 +789,9 @@ class Teacher extends CI_Controller {
 					//$message =$message.$casuse[$i].' ধার্য '.$assign_fee[$i].'৳ জমা '.($paidamount[$i] + $ppaidamount[$i]).'৳';
 					$due = $assign_fee[$i]-($paidamount[$i]+$ppaidamount[$i]);
 					if($due>0){
-						$message =$message.' বাকি '.$due.'৳\n';$tdue+=$due;}
+						$message =$message.' বাকি '.$due.'৳\r\n';$tdue+=$due;}
 					else
-						$message =$message.'\n';
+						$message =$message.'\r\n';
 
 					if($paidamount[$i]==0)
 					continue;
@@ -829,7 +829,7 @@ class Teacher extends CI_Controller {
 				$this->db->insert_batch('ledgerposting', $insertdata);
 				$this->db->update_batch('student_fee',$updateArray, 'id');
 				if($tdue>0)
-				$message =$message.'মোট বাকি '.$tdue.'৳\n';
+				$message =$message.'মোট বাকি '.$tdue.'৳\r\n';
 				$sms = (mb_strlen($message, "UTF-16BE")/70);
 				$rechr = ($sms - floor($sms))*70;
 				if($rechr>40 || $rechr<8)
