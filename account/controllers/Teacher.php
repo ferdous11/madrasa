@@ -958,6 +958,35 @@ class Teacher extends CI_Controller {
 		}
 	}
 
+	public function smssend(){
+		$data['activemenu'] = 'master';
+		$data['activesubmenu'] = 'student';
+		$data['page_title'] = 'Student List';
+		$data['baseurl'] = $this->config->item('base_url');
+		$company_id = $this->session->userdata('company_id');
+	    if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+			
+			$data['classes'] = $this->db->query("select * from classes where company_id='$company_id'")->result();
+			if($this->input->post('class_id')){
+				$class_id= $this->input->post('class_id');
+	  			$smsbody = $this->input->post('smsbody');
+
+				//$this->db-query("select ")
+
+				
+	  			$this->load->view('teacher/smssend',$data);
+			}
+			else{
+				$data['class_id'] = "";
+				$data['section_id'] = "";
+				$this->load->view('teacher/smssend',$data);
+			}
+	  else :
+		$this->load->view('login', $data);
+
+	  endif;
+	}
+
 	//------------- Ajax call -----------------//
 
 	public function checkroll(){
@@ -1011,5 +1040,4 @@ class Teacher extends CI_Controller {
 		$mroll = $this->db->query("select max(s.roll) as roll from students as s left join accountledger as l on s.ledger_id=l.id where s.class_id='$id' and l.company_id='$company_id'")->row()->roll;
 		echo json_encode($mroll+1);
 	}
-	
 }

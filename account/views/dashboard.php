@@ -140,6 +140,38 @@
             </div>
         </div>
 
+        <div class="col-md-4 ">
+            <div class="">
+            <a style="text-decoration: none;" href="<?php echo site_url('teacher/smssend'); ?>">
+                
+                <section class="panel  red">
+                    <div class="symbol">
+                        <i class="fa fa-minus"></i>
+                    </div>
+                    <div class="value">                        
+                        <h1 class="dashbordh1">SMS দিন</h1>
+                    </div>
+                </section>
+            </a>
+            </div>
+        </div>
+
+        <div class="col-md-4 ">
+            <div class="">
+            <a style="text-decoration: none;" href="<?php echo site_url('exam'); ?>">
+                
+                <section class="panel  red">
+                    <div class="symbol">
+                        <i class="fa fa-minus"></i>
+                    </div>
+                    <div class="value">                        
+                        <h1 class="dashbordh1">পরীক্ষা</h1>
+                    </div>
+                </section>
+            </a>
+            </div>
+        </div>
+
         <!-- <div class="col-md-4 ">
             <div class="">
             <a style="text-decoration: none;" href="<?php echo site_url('purchase'); ?>">
