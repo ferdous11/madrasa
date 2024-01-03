@@ -18,21 +18,21 @@ class Purchase extends CI_Controller {
 
     public function index() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
         $data['activemenu'] = 'transection';
         $data['activesubmenu'] = 'purchase';
-        $data['company_id'] = $this->session->userdata('company_id');
+
         $data['page_title'] = 'Purchase products';
         
         $data['randomkey'] = time();
         $data['purchasedata'] = array();
         $data['suppliers'] = '';
         $data['date'] = date('Y-m-d H:i:s');
-        $data['classes'] = $this->db->query("select id,class_name from classes where company_id ='".$data['company_id']."' order by id asc")->result();
+        $data['classes'] = $this->db->query("select id,class_name from classes order by id asc")->result();
         $data['class_id']='';
         $data['uncomlitelist'] = $this->db->query("select randomkey,sum(qty*unit_price) as tprice, count(product_id) as titem from temp group by randomkey order by randomkey desc")->result();
         
-        $data['productlist']=$this->db->query("select id,product_name from products where company_id ='".$data['company_id']."' AND class_id='1' order by product_name asc")->result();
+        $data['productlist']=$this->db->query("select id,product_name from products where class_id='1' order by product_name asc")->result();
         
         
             $this->load->view('purchase_derectory/purchase', $data);
@@ -43,13 +43,12 @@ class Purchase extends CI_Controller {
 
     function save_temp() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'purchase';
             $data['page_title'] = 'Purchase products';
             $data['date'] = $this->input->post('date');
             $data['baseurl'] = $this->config->item('base_url');
-            $data['company_id']=$company_id=$this->session->userdata('company_id');
             $data['randomkey']=$randomkey = $this->input->post('randomkey');
             $data['suppliers']=$this->input->post('suppliers');
             $bprice = ($this->input->post('buyprice'));
@@ -57,13 +56,14 @@ class Purchase extends CI_Controller {
             $quantity = ($this->input->post('quantity'));
             $product_id = $this->input->post('product_id');
             $comment = $this->input->post('comment');
+            $unit_id = $this->input->post('unit_id');
 
             
 
             $data['class_id']=$class_id = $this->input->post('class_id');
            
-            $data['classes'] = $this->db->query("select id,class_name from classes where company_id ='".$data['company_id']."' order by id asc")->result();
-            $data['productlist']=$this->db->query("select id,product_name from products where company_id ='".$data['company_id']."' AND class_id =".$data['class_id']. " order by product_name asc")->result();
+            $data['classes'] = $this->db->query("select id,class_name from classes order by id asc")->result();
+            $data['productlist']=$this->db->query("select id,product_name from products where class_id =".$data['class_id']. " order by product_name asc")->result();
 
             
             $datar = array(
@@ -73,11 +73,11 @@ class Purchase extends CI_Controller {
                 'qty'=>$quantity,
                 'sales_price'=>$sales_price,
                 'comment' => $comment,
-                'company_id'=>$company_id
+                'unit_id' => $unit_id,
             );
             $this->db->insert('temp', $datar);
 
-            $data['purchasedata']= $this->db->query("select t.*,u.name as unit,p.product_name from temp as t left join product_unit as u on t.unit_id=u.id left join products as p on t.product_id= p.id  where t.company_id='$company_id' AND t.randomkey='$randomkey'")->result();
+            $data['purchasedata']= $this->db->query("select t.*,u.name as unit,p.product_name from temp as t left join product_unit as u on t.unit_id=u.id left join products as p on t.product_id= p.id  where  t.randomkey='$randomkey'")->result();
 
             $data['uncomlitelist'] = $this->db->query("select randomkey,sum(qty*unit_price) as tprice, count(product_id) as titem from temp group by randomkey order by randomkey desc")->result();
 
@@ -89,7 +89,7 @@ class Purchase extends CI_Controller {
 
     function removedata() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $id = $_GET['id'];
            
             $class_id=$data['class_id'] = $_GET['class_id'];
@@ -100,16 +100,15 @@ class Purchase extends CI_Controller {
             $data['activesubmenu'] = 'purchase';
             $data['page_title'] = 'Purchase products';
             $data['baseurl'] = $this->config->item('base_url');
-            $data['company_id']=$company_id=$this->session->userdata('company_id');
             $data['randomkey']=$randomkey = $_GET['randomkey'];
 
             
-            $data['classes'] = $this->db->query("select id,class_name from classes where company_id ='".$data['company_id']."' order by id asc")->result();
+            $data['classes'] = $this->db->query("select id,class_name from classes order by id asc")->result();
               
-            $data['productlist']=$this->db->query("select id,product_name from products where company_id ='".$data['company_id']."' AND class_id =".$data['class_id']. " order by product_name asc")->result();
+            $data['productlist']=$this->db->query("select id,product_name from products where  class_id =".$data['class_id']. " order by product_name asc")->result();
             $this->db->query("DELETE from temp where id='$id'");
 
-            $data['purchasedata']= $this->db->query("select t.*,u.name as unit,p.product_name from temp as t left join product_unit as u on t.unit_id=u.id left join products as p on t.product_id= p.id  where t.company_id='$company_id' AND t.randomkey='$randomkey'")->result();
+            $data['purchasedata']= $this->db->query("select t.*,u.name as unit,p.product_name from temp as t left join product_unit as u on t.unit_id=u.id left join products as p on t.product_id= p.id  where t.randomkey='$randomkey'")->result();
             $data['uncomlitelist'] = $this->db->query("select randomkey,sum(qty*unit_price) as tprice, count(product_id) as titem from temp group by randomkey order by randomkey desc")->result();
             
             $this->load->view('purchase_derectory/purchase', $data);
@@ -121,7 +120,7 @@ class Purchase extends CI_Controller {
 
     function savepurchase(){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
 
         $product_idl=$this->input->post('product_idl');
         if($product_idl===null){
@@ -138,7 +137,6 @@ class Purchase extends CI_Controller {
         $unitl = $this->input->post('unitl');
         $date = $this->input->post('date');
         $data['randomkey']=$randomkey = $this->input->post('randomkey');
-        $company_id=$this->session->userdata('company_id');
         $t_price=$this->input->post('t_price');
         $shippingcost=$this->input->post('shippingcost');
         $othercost=$this->input->post('othercost');
@@ -153,6 +151,16 @@ class Purchase extends CI_Controller {
         $pamount = $t_price;
         $amount=$shippingcost+$othercost+$labourcost+$pamount;
 
+        $datalist = array(
+            'invoiceid' => $randomkey,
+            'total_purchase' =>$t_price ,
+            'date'=>$date,
+            'payment'=>$payment,
+            'supplier_id' => $supplier_id,
+            'user_id' => $user_id
+        );   
+        $this->db->insert('purchase_summary', $datalist);   
+
         for ($i = 0; $i < count($product_idl); $i++) {
             $id = $product_idl[$i];
             $getpdetails = $this->db->query("select * from products where id = '$id'")->row();
@@ -166,8 +174,7 @@ class Purchase extends CI_Controller {
                 'quantity'=>$qtyl[$i],
                 'a_quantity'=>$qtyl[$i],
                 'date' => $date,
-                'comment' => $comment[$i],
-                'company_id' => $company_id
+                'comment' => $comment[$i]
             );   
             $this->db->insert('purchase', $datalist);
                 
@@ -179,16 +186,7 @@ class Purchase extends CI_Controller {
         $this->db->query("delete from temp where randomkey = '$randomkey'");
         // -----------------------insert purchase_summary ----------------
         
-        $datalist = array(
-            'invoiceid' => $randomkey,
-            'total_purchase' =>$t_price ,
-            'date'=>$date,
-            'payment'=>$payment,
-            'supplier_id' => $supplier_id,
-            'user_id' => $user_id,
-            'company_id' => $company_id
-        );   
-        $this->db->insert('purchase_summary', $datalist);   
+        
 
         //------------------------//
 
@@ -204,7 +202,6 @@ class Purchase extends CI_Controller {
             'debit' => $pamount,
             'credit' => '0',
             'description' => "Pur-". sprintf("%06d", $purchase_summary_id),
-            'company_id' => $this->session->userdata('company_id'),
             'user_id' => $user_id,
         );
         $this->db->insert('ledgerposting', $datalist_payment1);
@@ -218,8 +215,7 @@ class Purchase extends CI_Controller {
             'debit' => '0',
             'credit' => $amount,
             'description' => "Pur-". sprintf("%06d", $purchase_summary_id),
-            'user_id' => $user_id,
-            'company_id' => $this->session->userdata('company_id')
+            'user_id' => $user_id
         );
         $this->db->insert('ledgerposting', $datalist_payment2);
 
@@ -231,7 +227,6 @@ class Purchase extends CI_Controller {
                 'date' => $date,
                 'amount' => $payment,
                 'description' => "Pur-". sprintf("%06d", $purchase_summary_id),
-                'company_id' => $this->session->userdata('company_id'),
                 'user_id' => $this->session->userdata('user_id')
             );
             $this->db->insert('payments', $datalist);
@@ -248,8 +243,7 @@ class Purchase extends CI_Controller {
                 'credit' => $payment,
                 'vouchertype' => 'Payment voucher',
                 'description' => "Pur-". sprintf("%06d", $purchase_summary_id),
-                'user_id' => $user_id,
-                'company_id' => $this->session->userdata('company_id')
+                'user_id' => $user_id
             );
 
             $this->db->insert('ledgerposting', $datalist);
@@ -262,8 +256,7 @@ class Purchase extends CI_Controller {
                 'credit' => 0,
                 'vouchertype' => 'Payment voucher',
                 'description' => "Pur-". sprintf("%06d", $purchase_summary_id),
-                'user_id' => $user_id,
-                'company_id' => $this->session->userdata('company_id')
+                'user_id' => $user_id
             );
             $this->db->insert('ledgerposting', $datalist2);
         endif;
@@ -280,7 +273,7 @@ class Purchase extends CI_Controller {
         $purchaseid = $this->input->post('invoiceid');
         if (is_numeric($purchaseid)):
             $data['invoiceid'] = $purchaseid;
-            $data['purchasedata'] = $this->db->query("select p.*,u.name,i.pname from purchase as p left join products as i on p.product_id=i.id left join product_unit as u on i.unit=u.id   where p.invoiceid = '$purchaseid'")->result();
+            $data['purchasedata'] = $this->db->query("select p.*,u.name,i.pname from purchase as p left join products as i on p.product_id=i.id left join product_unit as u on i.unit_id=u.id   where p.invoiceid = '$purchaseid'")->result();
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'purchase_return';
             $data['page_title'] = 'Purchase products';
@@ -292,7 +285,7 @@ class Purchase extends CI_Controller {
     }
 
     function tempremove(){
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
         $randomkey = $_GET['randomkey'];
         $this->db->query("DELETE FROM temp WHERE randomkey='$randomkey'");
             return $this->index();
@@ -303,19 +296,18 @@ class Purchase extends CI_Controller {
 
     function showtemp(){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $randomkey = $_GET['randomkey'];
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'purchase';
             $data['page_title'] = 'Purchase products';
             $data['date'] = date("Y-m-d");
             $data['baseurl'] = $this->config->item('base_url');
-            $company_id = $data['company_id']=$company_id=$this->session->userdata('company_id');
             $data['randomkey']=$randomkey;
 
             //$data['uncomlitelist'] = $this->db->query("select randsellid,sum(total_price) as tprice, count(product_id) as titem from temp group by randsellid order by randsellid desc")->result();
 
-            $data['purchasedata']= $this->db->query("select t.*,u.name as unit,p.product_name from temp as t left join product_unit as u on t.unit_id=u.id left join products as p on t.product_id= p.id  where t.company_id='$company_id' AND t.randomkey='$randomkey' order by t.id desc")->result();
+            $data['purchasedata']= $this->db->query("select t.*,u.name as unit,p.product_name from temp as t left join product_unit as u on t.unit_id=u.id left join products as p on t.product_id= p.id  where  t.randomkey='$randomkey' order by t.id desc")->result();
             
             $pid= $data['purchasedata'][0]->product_id;
           
@@ -323,7 +315,7 @@ class Purchase extends CI_Controller {
 
             $data['class_id']=$product->class_id;
             
-            $data['classes'] = $this->db->query("select id,class_name from classes where company_id ='".$data['company_id']."' order by id asc")->result();
+            $data['classes'] = $this->db->query("select id,class_name from classes order by id asc")->result();
             $data['productlist'] = array();
             $data['suppliers'] = '';
 
@@ -395,18 +387,17 @@ class Purchase extends CI_Controller {
         if ($this->session->userdata('loggedin') == 'yes' && ($this->session->userdata('role') == 'admin'||($data['purchasesummary']->date > $datef." 00:00:00" && $data['purchasesummary']->date < $datef." 23:59:59" ))):
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'purchasehistory';
-        $company_id = $this->session->userdata('company_id');
         $data['baseurl'] = $this->config->item('base_url');
         $data['randsellid']=$invoiceid;
         $data['class_id']=1;
   
         
         $data['supplier'] = $data['purchasesummary']->supplier_id;
-        $data['productlist']=$this->db->query("select id,product_name,class_id from products where company_id ='".$company_id."' order by product_name asc")->result();
-        $data['classes'] = $this->db->query("select id,class_name from classes where company_id ='".$data['company_id']."' order by id asc")->result();
+        $data['productlist']=$this->db->query("select id,product_name,class_id from products order by product_name asc")->result();
+        $data['classes'] = $this->db->query("select id,class_name from classes order by id asc")->result();
 
-        $data['purchasedata'] = $data['selldata'] = $this->db->query("select s.*,p.product_name as name,p.class_id,p.unit as unit_id ,u.name as unit_name from purchase as s left join products as p on s.product_id=p.id left join product_unit as u on p.unit=u.id where s.invoiceid='$invoiceid' order by id desc")->result();
-        $data['getsupplier'] = $this->db->query("select id,ledgername from accountledger where accountgroupid = '5' and company_id = '$company_id' order by ledgername")->result();
+        $data['purchasedata'] = $data['selldata'] = $this->db->query("select s.*,p.product_name as name,p.class_id,p.unit as unit_id ,u.name as unit_name from purchase as s left join products as p on s.product_id=p.id left join product_unit as u on p.unit_id=u.id where s.invoiceid='$invoiceid' order by id desc")->result();
+        $data['getsupplier'] = $this->db->query("select id,ledgername from accountledger where accountgroupid = '5' order by ledgername")->result();
             $this->load->view('purchase_derectory/editpurchase',$data);
         else:
         $this->session->set_userdata('failed','Only Admin Access This Function');
@@ -484,7 +475,7 @@ class Purchase extends CI_Controller {
             $this->session->set_userdata('notification',$this->session->userdata('notification')-1);
         
         
-        $this->db->query("Update purchase set product_id='$product_id',buyprice='$sellprice',quantity='$quantity',unit='$product->unit' where id='$dailysellid'");
+        $this->db->query("Update purchase set product_id='$product_id',buyprice='$sellprice',quantity='$quantity',unit_id='$product->unit' where id='$dailysellid'");
 
         $p = ($sellprice * $quantity) - ($pprice * $pquantity);
 
@@ -551,7 +542,6 @@ class Purchase extends CI_Controller {
                 'date' => $date,
                 'amount' => $payment,
                 'description' => "Pur-". sprintf("%06d", $dailys->id),
-                'company_id' => $this->session->userdata('company_id'),
                 'user_id' => $this->session->userdata('user_id'),
             );
             $this->db->insert('payments', $datalist);
@@ -565,7 +555,6 @@ class Purchase extends CI_Controller {
                 'credit' => $payment,
                 'vouchertype' => 'Payment voucher',
                 'description' => "Pur-". sprintf("%06d", $dailys->id),
-                'company_id' => $this->session->userdata('company_id'),
                 'user_id' => $this->session->userdata('user_id'),
             );
             
@@ -579,7 +568,6 @@ class Purchase extends CI_Controller {
                 'credit' => 0,
                 'vouchertype' => 'Payment voucher',
                 'description' => "Pur-". sprintf("%06d", $dailys->id),
-                'company_id' => $this->session->userdata('company_id'),
                 'user_id' => $this->session->userdata('user_id'),
             );
             $this->db->insert('ledgerposting', $datalist2);
@@ -598,22 +586,21 @@ class Purchase extends CI_Controller {
     function purchase_return() {
 
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
         $data['activemenu'] = 'transection';
         $data['activesubmenu'] = 'purchase_return';
         $data['page_title'] = 'Purchase Return';
-        $data['company_id'] = $this->session->userdata('company_id');
         $data['baseurl'] = $this->config->item('base_url');
         $data['randomkey'] = time();
         $data['purchasedata'] = array();
         $data['suppliers'] = '';
         $data['date'] = date('Y-m-d H:i:s');
-        $data['classes'] = $this->db->query("select id,class_name from classes where company_id ='".$data['company_id']."' order by id asc")->result();
+        $data['classes'] = $this->db->query("select id,class_name from classes order by id asc")->result();
     
         $data['class_id']='';
         $data['uncomlitelist'] = $this->db->query("select randomkey,sum(qty*unit_price) as tprice, count(product_id) as titem from temp_purchasereturn group by randomkey order by randomkey desc")->result();
      
-            $data['productlist']=$this->db->query("select id,product_name from products where company_id ='".$data['company_id']."' AND class_id='1' order by product_name asc")->result();
+            $data['productlist']=$this->db->query("select id,product_name from products where  class_id='1' order by product_name asc")->result();
        
             $this->load->view('purchase_derectory/purchasereturn', $data);
         else:
@@ -623,13 +610,13 @@ class Purchase extends CI_Controller {
 
     function purchasereturn_temp(){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'purchase_return';
             $data['page_title'] = 'Purchase Return';
             $data['date'] = $this->input->post('date');
             $data['baseurl'] = $this->config->item('base_url');
-            $data['company_id']=$company_id=$this->session->userdata('company_id');
+        
             $data['randomkey']=$randomkey = $this->input->post('randomkey');
             $data['suppliers']=$this->input->post('suppliers');
             $bprice = ($this->input->post('buyprice'));
@@ -640,9 +627,9 @@ class Purchase extends CI_Controller {
 
             
             
-            $data['classes'] = $this->db->query("select id,class_name from classes where company_id ='".$data['company_id']."' order by id asc")->result();
+            $data['classes'] = $this->db->query("select id,class_name from classes order by id asc")->result();
         
-            $data['productlist']=$this->db->query("select id,product_name from products where company_id ='".$data['company_id']."' AND class_id =".$data['class_id']. " order by product_name asc")->result();
+            $data['productlist']=$this->db->query("select id,product_name from products where class_id =".$data['class_id']. " order by product_name asc")->result();
 
 
             $datar = array(
@@ -651,12 +638,11 @@ class Purchase extends CI_Controller {
                 'unit_price'=>$bprice,
                 'unit_id'=>$this->input->post('unit_id'),
                 'qty'=>$quantity,
-                'comment' => $comment,
-                'company_id'=>$company_id
+                'comment' => $comment
             );
             $this->db->insert('temp_purchasereturn', $datar);
 
-            $data['purchasedata']= $this->db->query("select t.*,u.name as unit,p.product_name from temp_purchasereturn as t left join product_unit as u on t.unit_id=u.id left join products as p on t.product_id= p.id  where t.company_id='$company_id' AND t.randomkey='$randomkey'")->result();
+            $data['purchasedata']= $this->db->query("select t.*,u.name as unit,p.product_name from temp_purchasereturn as t left join product_unit as u on t.unit_id=u.id left join products as p on t.product_id= p.id  where t.randomkey='$randomkey'")->result();
 
             $data['uncomlitelist'] = $this->db->query("select randomkey,sum(qty*unit_price) as tprice, count(product_id) as titem from temp_purchasereturn group by randomkey order by randomkey desc")->result();
 
@@ -668,7 +654,7 @@ class Purchase extends CI_Controller {
 
     function purchase_return_submit() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
 
         $product_idl=$this->input->post('product_idl');
         if($product_idl===null){
@@ -684,7 +670,6 @@ class Purchase extends CI_Controller {
         $date = $this->input->post('date');
         $discount = $this->input->post('discount');
         $data['randomkey']=$randomkey = $this->input->post('randomkey');
-        $company_id=$this->session->userdata('company_id');
         $t_price=$this->input->post('t_price');
         $comment = $this->input->post('comment');
         $received_amount = $this->input->post('received_amount');
@@ -731,10 +716,10 @@ class Purchase extends CI_Controller {
                 'quantity' => $qtyl[$i],
                 'return_price'=> $pricel[$i],
                 'devcomment' => json_encode($devcomment),
-                'unit' => $unitl[$i],
+                'unit_id' => $unitl[$i],
                 'date' => $date,
-                'comment' => $comment[$i],
-                'company_id' => $company_id
+                'comment' => $comment[$i]
+                
             );   
             $this->db->insert('purchase_return', $datalistsell);   
             savelog('Purchase return or update', 'Product ID: ' . $product_idl[$i] . ' updated from IP:' . $_SERVER['REMOTE_ADDR'] . ' Browser: ' . $_SERVER['HTTP_USER_AGENT']);
@@ -749,8 +734,7 @@ class Purchase extends CI_Controller {
             'user_id' => $user_id,
             'customer_id' => $supplier_id,
             'Description'=>$this->input->post('comments'),
-            'received'=>$received_amount,
-            'company_id' => $company_id
+            'received'=>$received_amount
         );   
         $this->db->insert('purchase_return_summary', $datalist);       
         $INSERT_ID = $this->db->insert_id();
@@ -763,8 +747,7 @@ class Purchase extends CI_Controller {
             'debit' => '0',
             'credit' => $t_price,
             'user_id' => $user_id,
-            'description' => "Pr-". sprintf("%06d", $INSERT_ID),
-            'company_id' => $this->session->userdata('company_id')
+            'description' => "Pr-". sprintf("%06d", $INSERT_ID)
         );
         $this->db->insert('ledgerposting', $datalist_payment1);
 
@@ -777,8 +760,7 @@ class Purchase extends CI_Controller {
             'debit' => $t_price,
             'credit' => '0',
             'description' => "Pr-". sprintf("%06d", $INSERT_ID),
-            'user_id' => $user_id,
-            'company_id' => $this->session->userdata('company_id')
+            'user_id' => $user_id
         );
         $this->db->insert('ledgerposting', $datalist_payment2);
 
@@ -791,8 +773,7 @@ class Purchase extends CI_Controller {
                 'debit' => $discount,
                 'credit' => '0',
                 'description' => "Pr-". sprintf("%06d", $INSERT_ID),
-                'user_id' => $user_id,
-                'company_id' => $this->session->userdata('company_id')
+                'user_id' => $user_id
             );
             $this->db->insert('ledgerposting', $datalist_payment1);
 
@@ -805,8 +786,7 @@ class Purchase extends CI_Controller {
                 'debit' => '0',
                 'credit' => $discount,
                 'description' => "Pr-". sprintf("%06d", $INSERT_ID),
-                'user_id' => $user_id,
-                'company_id' => $this->session->userdata('company_id')
+                'user_id' => $user_id
             );
             $this->db->insert('ledgerposting', $datalist_payment2);
         }
@@ -818,7 +798,6 @@ class Purchase extends CI_Controller {
                     'date' => $this->input->post('date'),
                     'amount' => $received_amount,
                     'description' => "Pr-". sprintf("%06d", $INSERT_ID),
-                    'company_id' => $this->session->userdata('company_id'),
                     'user_id' => $user_id,
 
                 );
@@ -835,8 +814,7 @@ class Purchase extends CI_Controller {
                     'credit' => 0,
                     'vouchertype' => 'Received voucher',
                     'description' => "Pr-". sprintf("%06d", $INSERT_ID),
-                    'user_id' => $user_id,
-                    'company_id' => $this->session->userdata('company_id')
+                    'user_id' => $user_id
                 );
                 $this->db->insert('ledgerposting', $datalist);
 
@@ -848,8 +826,7 @@ class Purchase extends CI_Controller {
                     'credit' => $received_amount,
                     'vouchertype' => 'Received voucher',
                     'description' => "Pr-". sprintf("%06d", $INSERT_ID),
-                    'user_id' => $user_id,
-                    'company_id' => $this->session->userdata('company_id')
+                    'user_id' => $user_id
                 );
                 $this->db->insert('ledgerposting', $datalist2);
         }
@@ -864,7 +841,7 @@ class Purchase extends CI_Controller {
 
     function removedata_return() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $id = $_GET['id'];
             
             $class_id=$data['class_id'] = $_GET['class_id'];
@@ -874,17 +851,16 @@ class Purchase extends CI_Controller {
             $data['activesubmenu'] = 'purchase_return';
             $data['page_title'] = 'Purchase Return';
             $data['baseurl'] = $this->config->item('base_url');
-            $data['company_id']=$company_id=$this->session->userdata('company_id');
             $data['randomkey']=$randomkey = $_GET['randomkey'];
 
             
-            $data['classes'] = $this->db->query("select id,class_name from classes where company_id ='".$data['company_id']."' order by id asc")->result();
+            $data['classes'] = $this->db->query("select id,class_name from classes order by id asc")->result();
             
              
-            $data['productlist']=$this->db->query("select id,product_name from products where company_id ='".$data['company_id']."' AND class_id =".$data['class_id']. "order by product_name asc")->result();
+            $data['productlist']=$this->db->query("select id,product_name from products where class_id =".$data['class_id']. "order by product_name asc")->result();
             $this->db->query("DELETE from temp_purchasereturn where id='$id'");
 
-            $data['purchasedata']= $this->db->query("select t.*,u.name as unit,p.product_name from temp_purchasereturn as t left join product_unit as u on t.unit_id=u.id left join products as p on t.product_id= p.id  where t.company_id='$company_id' AND t.randomkey='$randomkey'")->result();
+            $data['purchasedata']= $this->db->query("select t.*,u.name as unit,p.product_name from temp_purchasereturn as t left join product_unit as u on t.unit_id=u.id left join products as p on t.product_id= p.id  where t.randomkey='$randomkey'")->result();
             $data['uncomlitelist'] = $this->db->query("select randomkey,sum(qty*unit_price) as tprice, count(product_id) as titem from temp_purchasereturn group by randomkey order by randomkey desc")->result();
             
             $this->load->view('purchase_derectory/purchasereturn', $data);
@@ -896,7 +872,7 @@ class Purchase extends CI_Controller {
 
     function tempremove_return(){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
         $randomkey = $_GET['randomkey'];
         $this->db->query("DELETE FROM temp_purchasereturn WHERE randomkey='$randomkey'");
             redirect('purchase/purchase_return');
@@ -907,25 +883,24 @@ class Purchase extends CI_Controller {
 
     function showtemp_return(){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $randomkey = $_GET['randomkey'];
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'purchase_return';
             $data['page_title'] = 'Purchase Return';            
             $data['date'] = date("Y-m-d");
             $data['baseurl'] = $this->config->item('base_url');
-            $company_id = $data['company_id']=$company_id=$this->session->userdata('company_id');
             $data['randomkey']=$randomkey;
 
             $data['class_id']='';
          
-            $data['classes'] = $this->db->query("select id,class_name from classes where company_id ='".$data['company_id']."' order by id asc")->result();
+            $data['classes'] = $this->db->query("select id,class_name from classes order by id asc")->result();
             $data['productlist'] = array();
             $data['suppliers'] = '';
 
             $data['uncomlitelist'] = $this->db->query("select randomkey,sum(qty*unit_price) as tprice, count(product_id) as titem from temp_purchasereturn group by randomkey order by randomkey desc")->result();
 
-            $data['purchasedata']= $this->db->query("select t.*,u.name as unit,p.product_name from temp_purchasereturn as t left join product_unit as u on t.unit_id=u.id left join products as p on t.product_id= p.id  where t.company_id='$company_id' AND t.randomkey='$randomkey'")->result();
+            $data['purchasedata']= $this->db->query("select t.*,u.name as unit,p.product_name from temp_purchasereturn as t left join product_unit as u on t.unit_id=u.id left join products as p on t.product_id= p.id  where t.randomkey='$randomkey'")->result();
             $this->load->view('purchase_derectory/purchasereturn', $data);
         else:
             $this->load->view('login', $data);
@@ -935,12 +910,11 @@ class Purchase extends CI_Controller {
     //---------------------------Purchase Details--------------------------//
 
     function purchasedetails(){
-        $company_id = $this->session->userdata('company_id');
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'purchasedetails';
         $data['page_title'] = 'Purchase Details';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $sdate = date("Y-m-d") . ' 00:00:00';
             $edate = date("Y-m-d") . ' 23:59:59';
 
@@ -950,8 +924,8 @@ class Purchase extends CI_Controller {
             $data['cname'] = '';
             $data['customerlist'] = $this->db->query("select l.ledgername,l.id,l.address,l.mobile,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where l.accountgroupid=5 and l.status<> 0")->result();
 
-            $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,di.name as district_name,u.name as unit, ds.id as sellid from purchase as d left join products as p on d.product_id=p.id left join accountledger as l on d.supplier_id=l.id left join product_unit as u on d.unit=u.id left join purchase_summary as ds on d.invoiceid=ds.invoiceid left join districts as di on l.district=di.id   where d.date between '$sdate' AND '$edate' AND d.company_id = '$company_id'")->result();
-            // $data['sellSummary']= $this->db->query("select sum(discount) as discount,sum(shipping_cost) as shipping_cost, sum(labour_cost) as labour_cost, sum(other_cost) as other_cost from purchase_summary WHERE date between '$sdate' AND '$edate' AND company_id = '$company_id'")->row();  
+            $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,di.name as district_name,u.name as unit, ds.id as sellid from purchase as d left join products as p on d.product_id=p.id left join accountledger as l on d.supplier_id=l.id left join product_unit as u on d.unit_id=u.id left join purchase_summary as ds on d.invoiceid=ds.invoiceid left join districts as di on l.district=di.id   where d.date between '$sdate' AND '$edate'")->result();
+            // $data['sellSummary']= $this->db->query("select sum(discount) as discount,sum(shipping_cost) as shipping_cost, sum(labour_cost) as labour_cost, sum(other_cost) as other_cost from purchase_summary WHERE date between '$sdate' AND '$edate'")->row();  
             $this->load->view('purchase_derectory/purchasedetails', $data);
         else:
             $this->load->view('login', $data);
@@ -959,12 +933,12 @@ class Purchase extends CI_Controller {
     }
 
     function viewPurchseDetails() {
-        $company_id = $this->session->userdata('company_id');
+      
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'purchasedetails';
         $data['page_title'] = 'Purchase Details';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
 
         $sdate = $this->input->post('sdate') . ' 00:00:00';
         $edate = $this->input->post('edate') . ' 23:59:59';
@@ -979,11 +953,11 @@ class Purchase extends CI_Controller {
             $data['customerlist'] = $this->db->query("select l.ledgername,l.id,l.address,l.mobile,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where l.accountgroupid=5 and l.status<>0")->result();
 
             if ($data['user'] == 'all'):
-                $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,di.name as district_name,u.name as unit,ds.id as sellid from purchase as d left join products as p on d.product_id=p.id left join accountledger as l on d.supplier_id=l.id left join product_unit as u on d.unit=u.id left join purchase_summary as ds on d.invoiceid=ds.invoiceid left join districts as di on l.district=di.id where d.date between '$sdate' AND '$edate' AND d.company_id = '$company_id'")->result();
-                // $data['sellSummary']= $this->db->query("select sum(discount) as discount,sum(shipping_cost) as shipping_cost, sum(labour_cost) as labour_cost, sum(other_cost) as other_cost from purchase_summary WHERE date between '$sdate' AND '$edate' AND company_id = '$company_id'")->row(); 
+                $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,di.name as district_name,u.name as unit,ds.id as sellid from purchase as d left join products as p on d.product_id=p.id left join accountledger as l on d.supplier_id=l.id left join product_unit as u on d.unit_id=u.id left join purchase_summary as ds on d.invoiceid=ds.invoiceid left join districts as di on l.district=di.id where d.date between '$sdate' AND '$edate'")->result();
+                // $data['sellSummary']= $this->db->query("select sum(discount) as discount,sum(shipping_cost) as shipping_cost, sum(labour_cost) as labour_cost, sum(other_cost) as other_cost from purchase_summary WHERE date between '$sdate' AND '$edate'")->row(); 
             else:
-                $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,di.name as district_name,u.name as unit,ds.id as sellid from purchase as d left join products as p on d.product_id=p.id left join accountledger as l on d.supplier_id=l.id left join product_unit as u on d.unit=u.id left join purchase_summary as ds on d.invoiceid=ds.invoiceid left join districts as di on l.district=di.id where d.date between '$sdate' AND '$edate' AND d.company_id = '$company_id' AND d.supplier_id='$name'")->result();
-                $data['sellSummary']= $this->db->query("select sum(discount) as discount,sum(shipping_cost) as shipping_cost, sum(labour_cost) as labour_cost, sum(other_cost) as other_cost from purchase_summary WHERE date between '$sdate' AND '$edate' AND company_id = '$company_id' AND supplier_id='$name'")->row(); 
+                $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,di.name as district_name,u.name as unit,ds.id as sellid from purchase as d left join products as p on d.product_id=p.id left join accountledger as l on d.supplier_id=l.id left join product_unit as u on d.unit_id=u.id left join purchase_summary as ds on d.invoiceid=ds.invoiceid left join districts as di on l.district=di.id where d.date between '$sdate' AND '$edate' AND d.supplier_id='$name'")->result();
+                $data['sellSummary']= $this->db->query("select sum(discount) as discount,sum(shipping_cost) as shipping_cost, sum(labour_cost) as labour_cost, sum(other_cost) as other_cost from purchase_summary WHERE date between '$sdate' AND '$edate' AND supplier_id='$name'")->row(); 
             endif;
 
         $this->load->view('purchase_derectory/purchasedetails', $data);
@@ -1002,12 +976,11 @@ class Purchase extends CI_Controller {
         $data['page_title'] = 'Purchase history';
         $data['supplier_id'] = 'all';
         $data['baseurl'] = $this->config->item('base_url');
-        $comid = $this->session->userdata('company_id');
         $sdate = date("Y-m-d") . ' 00:00:00';
         $edate = date("Y-m-d") . ' 23:59:59';
   
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
-            $data['purchasedata'] = $this->db->query("select p.*,u.fullname from purchase_summary as p left join alluser as u on p.user_id=u.id where p.company_id = '$comid' order by p.id desc limit 10")->result();
+        if ($this->session->userdata('loggedin') == 'yes'):
+            $data['purchasedata'] = $this->db->query("select p.*,u.fullname from purchase_summary as p left join alluser as u on p.user_id=u.id order by p.id desc limit 10")->result();
             $this->load->view('purchase_derectory/purchase_history', $data);
         else:
             $this->load->view('login', $data);
@@ -1015,12 +988,12 @@ class Purchase extends CI_Controller {
     }
 
     function viewpurchasehistory() {
-        $company_id = $this->session->userdata('company_id');
+        
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'purchasehistory';
         $data['page_title'] = 'Purchase History';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
 
                 $sdate = $this->input->post('sdate') . ' 00:00:00';
                 $edate = $this->input->post('edate') . ' 23:59:59';
@@ -1034,9 +1007,9 @@ class Purchase extends CI_Controller {
 
             
             if ($supplier_id == 'all'):
-                $data['purchasedata'] = $this->db->query("select p.*,u.fullname from purchase_summary as p left join alluser as u on p.user_id=u.id where p.date between '$sdate' AND '$edate' AND p.company_id = '$company_id' group by p.invoiceid")->result();
+                $data['purchasedata'] = $this->db->query("select p.*,u.fullname from purchase_summary as p left join alluser as u on p.user_id=u.id where p.date between '$sdate' AND '$edate' group by p.invoiceid")->result();
             else:
-                $data['purchasedata'] = $this->db->query("select p.*,u.fullname from purchase_summary as p left join alluser as u on p.user_id=u.id  where p.date between '$sdate' AND '$edate' AND p.company_id = '$company_id' AND p.supplier_id='$supplier_id' group by p.invoiceid")->result();
+                $data['purchasedata'] = $this->db->query("select p.*,u.fullname from purchase_summary as p left join alluser as u on p.user_id=u.id  where p.date between '$sdate' AND '$edate' AND p.supplier_id='$supplier_id' group by p.invoiceid")->result();
                 
             endif;
             $this->load->view('purchase_derectory/purchase_history', $data);
@@ -1047,17 +1020,14 @@ class Purchase extends CI_Controller {
     
     function detailspurchase($id = '') {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $data['activemenu'] = 'reports';
             $data['activesubmenu'] = 'purchasehistory';
             $data['page_title'] = 'Purchase history';
             $data['baseurl'] = $this->config->item('base_url');
-            $company_id = $this->session->userdata('company_id');
-            $data['company'] = $this->db->query("select * from company where company_id = '$company_id'")->row();
             if (is_numeric($id)):
-                $comid = $this->session->userdata('company_id');
-                $data['purchasedata'] = $this->db->query("select d.*,p.product_name,u.name as unit from purchase as d left join products as p on d.product_id=p.id left join product_unit as u on d.unit=u.id where d.invoiceid = '$id' AND d.company_id = '$comid'")->result();
-                $data['summary']=$this->db->query("select p.*,l.ledgername,l.father_name,l.mobile,l.address,di.name as district_name,u.fullname from purchase_summary as p left join accountledger as l on p.supplier_id=l.id left join districts as di on l.district=di.id left join alluser as u on p.user_id=u.id where p.invoiceid = '$id' AND p.company_id = '$comid'")->row();
+                $data['purchasedata'] = $this->db->query("select d.*,p.product_name,u.name as unit from purchase as d left join products as p on d.product_id=p.id left join product_unit as u on p.unit_id=u.id where d.invoiceid = '$id'")->result();
+                $data['summary']=$this->db->query("select p.*,l.ledgername,l.father_name,l.mobile,l.address,di.name as district_name,u.fullname from purchase_summary as p left join accountledger as l on p.supplier_id=l.id left join districts as di on l.district=di.id left join alluser as u on p.user_id=u.id where p.invoiceid = '$id'")->row();
 
                 $data['grossTotal'] = $data['summary']->total_purchase;
        
@@ -1075,12 +1045,12 @@ class Purchase extends CI_Controller {
     }
     //sell
     function selldetails() {
-        $company_id = $this->session->userdata('company_id');
+        
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'selldetails';
         $data['page_title'] = 'Sales Details History';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $sdate = date("Y-m-d") . ' 00:00:00';
             $edate = date("Y-m-d") . ' 23:59:59';
 
@@ -1090,8 +1060,8 @@ class Purchase extends CI_Controller {
             $data['cname'] = 'all';
             $data['customerlist'] = $this->db->query("select l.ledgername,l.id,l.address,l.mobile,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where l.accountgroupid=16 and l.status<>0")->result();
 
-            $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit, ds.id as sellid from daily_sell as d left join products as p on d.product_id=p.id left join accountledger as l on d.customer_id=l.id left join product_unit as u on d.unit=u.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid left join districts as di on l.district=di.id   where d.date between '$sdate' AND '$edate' AND d.company_id = '$company_id'")->result();
-            $data['sellSummary']= $this->db->query("select sum(discount) as discount, sum(labour_cost) as labour_cost from daily_sell_summary WHERE date between '$sdate' AND '$edate' AND company_id = '$company_id'")->row();  
+            $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit, ds.id as sellid from daily_sell as d left join products as p on d.product_id=p.id left join accountledger as l on d.customer_id=l.id left join product_unit as u on d.unit_id=u.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid left join districts as di on l.district=di.id   where d.date between '$sdate' AND '$edate'")->result();
+            $data['sellSummary']= $this->db->query("select sum(discount) as discount, sum(labour_cost) as labour_cost from daily_sell_summary WHERE date between '$sdate' AND '$edate'")->row();  
             $this->load->view('purchase_derectory/selldetails', $data);
         else:
             $this->load->view('login', $data);
@@ -1100,7 +1070,7 @@ class Purchase extends CI_Controller {
 
     function print_purchase($id = '') {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $data['activemenu'] = 'reports';
             $data['activesubmenu'] = 'purchasehistory';
             $data['page_title'] = 'Purchase history';
@@ -1110,8 +1080,8 @@ class Purchase extends CI_Controller {
 
             if (is_numeric($id)):
                 $data['invoiceid'] = $id;
-                $comid = $this->session->userdata('company_id');
-                $data['purchasedata'] = $this->db->query("select * from purchase where invoiceid = '$id' AND company_id = '$comid'")->result();
+             
+                $data['purchasedata'] = $this->db->query("select * from purchase where invoiceid = '$id'")->result();
                 $data['supplierdata'] = $this->db->get_where('accountledger', array('id' => $data['purchasedata'][0]->supplier_id))->row();
                 $data['controller']=$this;
                 if($tem!=null):
@@ -1145,9 +1115,9 @@ class Purchase extends CI_Controller {
     }
 
     function getproduct_price() {
-        $comid = $this->session->userdata('company_id');
+       
         $pid = $this->input->post('product_id');
-        $getpdetails = $this->db->query("select p.*,u.name as unit from products as p left join product_unit as u on p.unit=u.id where p.id = '$pid' AND p.company_id = '$comid'")->row();
+        $getpdetails = $this->db->query("select p.*,u.name as unit from products as p left join product_unit as u on p.unit_id=u.id where p.id = '$pid' ")->row();
         echo json_encode($getpdetails);
     }
     function getpurchasedata() {

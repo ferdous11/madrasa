@@ -19,23 +19,22 @@ class Sell extends CI_Controller {
     public function index() {
         
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
         $data['activemenu'] = 'transection';
         $data['activesubmenu'] = 'sell';
         $data['page_title'] = 'Products sell';
-        $data['company_id'] = $this->session->userdata('company_id');
+        
         $data['baseurl'] = $this->config->item('base_url');
-        $data['allcategory'] = $this->db->query("select id,name from category where company_id ='".$data['company_id']."' order by name asc")->result();
         $data['sub_category']='';
         $data['category_id']='';
         $data['customer_id']='';
 
         if($this->session->userdata('fcategory')!='true')
-            $data['productlist']=$this->db->query("select id,product_name from products where company_id ='".$data['company_id']."' AND category_id='1' order by product_name asc")->result();
+            $data['productlist']=$this->db->query("select id,product_name from products where  category_id='1' order by product_name asc")->result();
         else
         $data['productlist']= array();
         $data['subCategory']= array();
-        $data['getcustomer'] = $this->db->query("select al.*,ds.name as district_name from accountledger as al left join districts as ds on al.district=ds.id where al.accountgroupid = '7' and al.company_id = ".$data['company_id']." and al.status<>0 order by al.ledgername")->result();
+        $data['getcustomer'] = $this->db->query("select al.*,ds.name as district_name from accountledger as al left join districts as ds on al.district=ds.id where al.accountgroupid = '7'  and al.status<>0 order by al.ledgername")->result();
         
         $data['randsellid'] = time();
         $data['date'] = date("Y-m-d H:i:s");
@@ -85,24 +84,20 @@ class Sell extends CI_Controller {
         $data['activesubmenu'] = 'sell';
         $data['page_title'] = 'Products sell';
         $data['baseurl'] = $this->config->item('base_url');
-        $data['getcategory2'] = $this->db->query("select id,name from category where company_id ='".$this->session->userdata('company_id')."' order by name asc")->result();
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        
+        if ($this->session->userdata('loggedin') == 'yes' ):
            
-            $data['company_id'] = $this->session->userdata('company_id');
+            
             $data['randsellid'] = $this->input->get('id');
             $data['category_id'] = $this->input->get('category_id');
             $data['sub_category'] = $this->input->get('sub_category');
             $data['customer_id'] = $this->input->get('customer_id');
             $data['date'] = $this->input->get('date');
 
-            $data['allcategory'] = $this->db->query("select id,name from category where company_id ='".$data['company_id']."' order by name asc")->result();
-            $data['subCategory']= $this->db->query("select id,name from sub_category where company_id ='".$data['company_id']."' AND category_id =".$data['category_id']." order by name asc")->result();
-            if($data['sub_category']==-1)
-            $data['productlist']=$this->db->query("select id,product_name from products where company_id ='".$data['company_id']."' AND category_id =".$data['category_id']. " order by product_name asc")->result();
-            else    
-            $data['productlist']=$this->db->query("select id,product_name from products where company_id ='".$data['company_id']."' AND category_id =".$data['category_id']. " AND sub_category =".$data['sub_category']. " order by product_name asc")->result();
+           
+            $data['productlist']=$this->db->query("select id,product_name from products order by product_name asc")->result();
             
-            $data['getcustomer'] = $this->db->query("select al.*,ds.name as district_name from accountledger as al left join districts as ds on al.district=ds.id where al.accountgroupid = '16' and al.company_id = ".$data['company_id']." and al.status<>0 order by al.ledgername")->result();
+            $data['getcustomer'] = $this->db->query("select al.*,ds.name as district_name from accountledger as al left join districts as ds on al.district=ds.id where al.accountgroupid = '16'  and al.status<>0 order by al.ledgername")->result();
             $data['uncomlitelist'] = $this->db->query("select customer_id,date,randsellid,sum(total_price) as tprice, count(product_id) as titem from tempsell group by randsellid order by randsellid desc")->result();
 
             $this->load->view('sell_derectory/sellproduct', $data);
@@ -113,26 +108,26 @@ class Sell extends CI_Controller {
 
     function showtemp(){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $randomkey = $_GET['randomkey'];
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'sell';
             $data['page_title'] = 'Products sell';
             
-            $data['getcategory2'] = $this->db->query("select id,name from category where company_id ='".$this->session->userdata('company_id')."' order by name asc")->result();
-            $data['company_id'] = $this->session->userdata('company_id');
+            $data['getcategory2'] = $this->db->query("select id,name from category order by name asc")->result();
+         
             $data['randsellid'] = $randomkey;
             $data['category_id'] = '';
             $data['sub_category'] = '';
             $tem = $this->db->query("select * from tempsell where randsellid='$randomkey'")->row();
             $data['customer_id'] = $tem->customer_id;
             $data['date'] = $tem->date;
-            $data['allcategory'] = $this->db->query("select id,name from category where company_id ='".$data['company_id']."' order by name asc")->result();
+            $data['allcategory'] = $this->db->query("select id,name from category order by name asc")->result();
             $data['subCategory']= array();
             $data['productlist']= array();
             
             
-            $data['getcustomer'] = $this->db->query("select al.*,ds.name as district_name from accountledger as al left join districts as ds on al.district=ds.id where al.accountgroupid = '16' and al.company_id = ".$data['company_id']." and al.status<>0 order by al.ledgername")->result();
+            $data['getcustomer'] = $this->db->query("select al.*,ds.name as district_name from accountledger as al left join districts as ds on al.district=ds.id where al.accountgroupid = '16'  and al.status<>0 order by al.ledgername")->result();
 
             $data['uncomlitelist'] = $this->db->query("select customer_id,date,randsellid,sum(total_price) as tprice, count(product_id) as titem from tempsell group by randsellid order by randsellid desc")->result();
 
@@ -144,7 +139,7 @@ class Sell extends CI_Controller {
     }
 
     function tempremove(){
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
         $randomkey = $_GET['randomkey'];
         $this->db->query("DELETE FROM tempsell WHERE randsellid='$randomkey'");
             redirect('sell');
@@ -155,11 +150,8 @@ class Sell extends CI_Controller {
 
     function sellsave() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $nettotal_price = 0;
-         
-           
-            $company_id = $this->session->userdata('company_id');
             $user_id = $this->session->userdata('user_id');
             $customer_id = $this->input->post('finalcustomer');
 
@@ -232,7 +224,6 @@ class Sell extends CI_Controller {
                     'date' => $this->input->post('finaldate'),
                     'comment' => $comment[$i],
                     'devcomment' => json_encode($devcomment),
-                    'company_id' => $company_id,
                     'lastbuyprice'=> $lastbuyprice,
                     'lastquantity'=> $lastquantity,
                 );
@@ -254,8 +245,7 @@ class Sell extends CI_Controller {
                     'due' => $due,
                     'pre_due' => $pre_due,
                     'discount' => $discount,
-                    'comment' => $this->input->post('sumComment'),
-                    'company_id' => $this->session->userdata('company_id')
+                    'comment' => $this->input->post('sumComment')
             );
 
             $this->db->insert('daily_sell_summary', $datalist2);
@@ -270,8 +260,7 @@ class Sell extends CI_Controller {
                 'debit' => '0',
                 'credit' => $total_price+$labour_charge+$transport_cost,
                 'description' => "Inv-". sprintf("%06d", $INSERT_ID),
-                'user_id'=>$user_id,
-                'company_id' => $this->session->userdata('company_id')
+                'user_id'=>$user_id
             );
             $this->db->insert('ledgerposting', $datalist_payment1);
 
@@ -283,8 +272,7 @@ class Sell extends CI_Controller {
                 'debit' => $total_price + $labour_charge+$transport_cost,
                 'credit' => '0',
                 'user_id'=>$user_id,
-                'description' => "Inv-". sprintf("%06d", $INSERT_ID),
-                'company_id' => $this->session->userdata('company_id')
+                'description' => "Inv-". sprintf("%06d", $INSERT_ID)
             );
             $this->db->insert('ledgerposting', $datalist_payment2);
 
@@ -302,8 +290,7 @@ class Sell extends CI_Controller {
                     'debit' => $discount,
                     'credit' => '0',
                     'user_id'=>$user_id,
-                    'description' => "Inv-". sprintf("%06d", $INSERT_ID),
-                    'company_id' => $this->session->userdata('company_id')
+                    'description' => "Inv-". sprintf("%06d", $INSERT_ID)
                 );
                 $this->db->insert('ledgerposting', $datalist_payment1);
 
@@ -316,8 +303,7 @@ class Sell extends CI_Controller {
                     'debit' => '0',
                     'credit' => $discount,
                     'user_id'=>$user_id,
-                    'description' => "Inv-". sprintf("%06d", $INSERT_ID),
-                    'company_id' => $this->session->userdata('company_id')
+                    'description' => "Inv-". sprintf("%06d", $INSERT_ID)
                 );
                 $this->db->insert('ledgerposting', $datalist_payment2);
             }
@@ -334,8 +320,7 @@ class Sell extends CI_Controller {
                     'credit' => 0,
                     'user_id'=>$user_id,
                     'vouchertype' => 'Received voucher',
-                    'description' => "Inv-". sprintf("%06d", $INSERT_ID),
-                    'company_id' => $this->session->userdata('company_id')
+                    'description' => "Inv-". sprintf("%06d", $INSERT_ID)
                 );
                 $this->db->insert('ledgerposting', $datalist);
                 $datalist2 = array(
@@ -346,8 +331,7 @@ class Sell extends CI_Controller {
                     'credit' => $paid_amount,
                     'user_id'=>$user_id,
                     'vouchertype' => 'Received voucher',
-                    'description' => "Inv-". sprintf("%06d", $INSERT_ID),
-                    'company_id' => $this->session->userdata('company_id')
+                    'description' => "Inv-". sprintf("%06d", $INSERT_ID)
                 );
                 $this->db->insert('ledgerposting', $datalist2);
 
@@ -357,8 +341,7 @@ class Sell extends CI_Controller {
                     'date' => $this->input->post('finaldate'),
                     'amount' => $paid_amount,
                     'user_id'=>$user_id,
-                    'description' => "Inv-". sprintf("%06d", $INSERT_ID),
-                    'company_id' => $this->session->userdata('company_id'),
+                    'description' => "Inv-". sprintf("%06d", $INSERT_ID)
                 );
                 $this->db->insert('received', $datalist);
 
@@ -406,15 +389,15 @@ class Sell extends CI_Controller {
 
     function printinvoice($invoiceid,$totalPrice=0,$discount=0,$labour_charge=0,$transport_cost=0,$grossTotal=0,$paidAmount=0,$preDue=0,$fTotalDue=0) {
         $data['baseurl'] = $this->config->item('base_url');
-      if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+      if ($this->session->userdata('loggedin') == 'yes' ):
 
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'sellhistory';
-        $company_id = $this->session->userdata('company_id');
-        $data['company'] = $this->db->query("select * from company where company_id = '$company_id'")->row();
-        $data['invoicedata'] = $this->db->query("select d.*,p.product_name ,u.name as unit_name from daily_sell as d left join products as p on d.product_id=p.id left join product_unit as u on d.unit=u.id where d.invoice_id = '$invoiceid' AND d.company_id = '$company_id'")->result();
+        
+        $data['company'] = $this->db->query("select * from company")->row();
+        $data['invoicedata'] = $this->db->query("select d.*,p.product_name ,u.name as unit_name from daily_sell as d left join products as p on d.product_id=p.id left join product_unit as u on d.unit=u.id where d.invoice_id = '$invoiceid'")->result();
 
-        $data['voicedata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.father_name,l.mobile,l.address,di.name as district_name,ui.fullname from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as ui on d.user_id=ui.id where d.voucherid = '$invoiceid' AND d.company_id = '$company_id'")->row();
+        $data['voicedata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.father_name,l.mobile,l.address,di.name as district_name,ui.fullname from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as ui on d.user_id=ui.id where d.voucherid = '$invoiceid'")->row();
 
         $data['totalPrice'] =($totalPrice);
        
@@ -437,15 +420,15 @@ class Sell extends CI_Controller {
 
     function sell_return() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
-            $data['company_id'] = $this->session->userdata('company_id');
+        if ($this->session->userdata('loggedin') == 'yes' ):
+            
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'sell_return';
             $data['page_title'] = 'Sales Return';
             $data['baseurl'] = $this->config->item('base_url');
             $data['voucherid'] = '';
             $data['summary'] = '';                            
-            $data['invoiceidp'] = $this->db->where('company_id', $data['company_id'])->select('voucherid')->get('daily_sell_summary')->result();
+            $data['invoiceidp'] = $this->db->select('voucherid')->get('daily_sell_summary')->result();
 
             $data['selldata'] = array();
             $this->load->view('sell_derectory/sellreturn', $data);
@@ -456,7 +439,7 @@ class Sell extends CI_Controller {
 
     function sell_return_view() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
 
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'sell_return';
@@ -464,14 +447,14 @@ class Sell extends CI_Controller {
             $data['baseurl'] = $this->config->item('base_url');
 
             $voucherid = $this->input->post('invoicenumber');
-            $company_id = $this->session->userdata('company_id');
+          
             $data['voucherid'] = $voucherid;
 
-            $data['invoiceidp'] = $this->db->where('company_id', $company_id)->select('voucherid')->get('daily_sell_summary')->result();
+            $data['invoiceidp'] = $this->db->select('voucherid')->get('daily_sell_summary')->result();
 
-            $data['selldata'] = $this->db->query("select d.*,p.product_name,u.name from daily_sell as d left join products as p on d.product_id=p.id left join product_unit as u on d.unit=u.id where d.invoice_id = '$voucherid' AND d.company_id = '$company_id' ")->result();
+            $data['selldata'] = $this->db->query("select d.*,p.product_name,u.name from daily_sell as d left join products as p on d.product_id=p.id left join product_unit as u on d.unit=u.id where d.invoice_id = '$voucherid'")->result();
 
-            $data['summary'] = $this->db->query("select d.*,l.ledgername from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id where d.voucherid = '$voucherid' AND d.company_id = '$company_id' ")->row();
+            $data['summary'] = $this->db->query("select d.*,l.ledgername from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id where d.voucherid = '$voucherid'")->row();
             $this->load->view('sell_derectory/sellreturn', $data);
         else:
             redirect('sell/login');
@@ -480,7 +463,7 @@ class Sell extends CI_Controller {
 
     function updatesell() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'sell_return';
             $data['page_title'] = 'Sales Return';
@@ -525,8 +508,7 @@ class Sell extends CI_Controller {
                 'credit' => '0',
                 'debit' => $CurentPrePrice,
                 'user_id' => $user_id,
-                'description' => "Product Name: ".$product_name." Quantity:".$qty,
-                'company_id' => $this->session->userdata('company_id')
+                'description' => "Product Name: ".$product_name." Quantity:".$qty
             );
             $this->db->insert('ledgerposting', $datalist_payment1);
 
@@ -539,8 +521,7 @@ class Sell extends CI_Controller {
                 'credit' => $CurentPrePrice,
                 'debit' =>'0',
                 'user_id' => $user_id,
-                'description' => "Product Name: ".$product_name." Quantity:".$qty,
-                'company_id' => $this->session->userdata('company_id')
+                'description' => "Product Name: ".$product_name." Quantity:".$qty
             );
             $this->db->insert('ledgerposting', $datalist_payment2);
 
@@ -549,20 +530,19 @@ class Sell extends CI_Controller {
                 'invoice_id' => $invoiceid,
                 'product_id' => $lastselldata->product_id,
                 'quantity' => $qty,
-                'date' => date('Y-m-d H:i:s'),
-                'company_id' => $this->session->userdata('company_id')
+                'date' => date('Y-m-d H:i:s')
             );
             $this->db->insert('sell_return', $datalistsell);
             savelog('Sales return or update', 'Product ID: ' . $lastselldata->product_id . ' updated from IP:' . $_SERVER['REMOTE_ADDR'] . ' Browser: ' . $_SERVER['HTTP_USER_AGENT']);
-            $company_id = $this->session->userdata('company_id');
+            
             $data['voucherid'] = $invoiceid;
             
-            $data['invoiceidp'] = $this->db->where('company_id', $company_id)->select('voucherid')->get('daily_sell_summary')->result();
+            $data['invoiceidp'] = $this->db->select('voucherid')->get('daily_sell_summary')->result();
 
             $this->session->set_userdata('success', 'Sales updated successfully');
-            $data['selldata'] = $this->db->query("select d.*,p.product_name,u.name from daily_sell as d left join products as p on d.product_id=p.id left join product_unit as u on d.unit=u.id where d.invoice_id = '$invoiceid' AND d.company_id = '$company_id' ")->result();
+            $data['selldata'] = $this->db->query("select d.*,p.product_name,u.name from daily_sell as d left join products as p on d.product_id=p.id left join product_unit as u on d.unit=u.id where d.invoice_id = '$invoiceid'")->result();
 
-            $data['summary'] = $this->db->query("select d.*,l.ledgername from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id where d.voucherid = '$invoiceid' AND d.company_id = '$company_id' ")->row();
+            $data['summary'] = $this->db->query("select d.*,l.ledgername from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id where d.voucherid = '$invoiceid'")->row();
 
             $this->load->view('sell_derectory/sellreturn', $data);
         else:
@@ -571,15 +551,13 @@ class Sell extends CI_Controller {
     }
 
     function getProduct() {
-        $company_id = $this->session->userdata('company_id');
         $class_id = $this->input->post('class_id');
-            $plist = $this->db->query("select id,product_name from products where class_id='$class_id' AND company_id = '$company_id' AND status='1'")->result();
+            $plist = $this->db->query("select id,product_name from products where class_id='$class_id' AND status='1'")->result();
         echo json_encode($plist);
     }
     
     function getCustomer(){
-        $company_id = $this->session->userdata('company_id');
-        $getcustomer= $this->db->query("select id,ledgername from accountledger where accountgroupid = '16' and company_id = ".$company_id." order by ledgername")->result();
+        $getcustomer= $this->db->query("select id,ledgername from accountledger where accountgroupid = '16' order by ledgername")->result();
         echo json_encode($getcustomer);
     }
 

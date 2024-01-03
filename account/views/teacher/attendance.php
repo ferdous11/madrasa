@@ -26,7 +26,7 @@
                 <div class="row">
                 <div class="col-md-6 col-md-push-3">
                     <div class="input-group">
-                    <select class="selectpicker form-control" id="class_id" placeholder="Select Class" tabindex="1"   data-live-search="true" name="class_id" onchange="getsection(this.value)">
+                    <select class="selectpicker form-control" id="class_id" placeholder="Select Class" tabindex="1"   data-live-search="true" name="class_id" >
                                     <option></option>
                                     <?php foreach ($classes as $class):?>
                                     <option <?php echo ($class->id==$class_id)?"selected":"";?> value="<?php echo $class->id?>"><?php echo $class->class_name?></option>
@@ -54,7 +54,7 @@
             <div style="text-align: center;background-color: #bcb9bd;margin-top: 20px;" class="row col-md-push-2 col-md-5 col-sm-12">
             <div class="col-md-6">
                 <div class="row">
-                    <div><h1><?php echo 'শ্রেনিঃ'.$class_name; echo $section_name!=''?" , ".$section_name:"";?></h1></div> 
+                    <div><h1><?php echo 'শ্রেনিঃ'.$class_name;?></h1></div> 
                 </div>
                 <div class="row">
                    <div><h1 id="counter">রোলঃ 1</h1></div> 
@@ -90,7 +90,7 @@
                             <tr>
                              
                               <td scope="row"> <b>
-                                    <?php $temp = $this->db->query("select id,attendance from attendance where insert_date='".date("Y-m-d")."' and student_id='".$student->id."'")->row(); 
+                                    <?php $temp = $this->db->query("select id,attendance from attendance where create_at between '".date("Y-m-d 00:00:00")."' and '".date("Y-m-d 23:59:59")."' and student_id='".$student->id."'")->row(); 
                                    
                                     if(empty($temp))
                                        $attendance = 0;
@@ -187,36 +187,6 @@
          $("#studentimg").attr("src", path + imagename);
          $("#counter").text('রোলঃ '+roll);
    }
-
-   function getsection(id){
-        var postdata = 'id=' + id;
-        $.ajax({
-            type: 'POST',
-            url: '<?php echo site_url("teacher/getsection"); ?>',
-            data: postdata,
-            success: function (response) {
-                var jsonObject = jQuery.parseJSON(response);
-                $("#student_section").find('option').remove().end();
-                $("#student_section").append($('<option>', {
-                        value: '' ,
-                        text: 'Select Section'
-                }));
-                if(Object.keys(jsonObject).length>0){
-                    $("#sectionflag").show();
-                    $.each( jsonObject, function( r,v) {
-                        
-                        $("#student_section").append($('<option>', {
-                            value: v.id,
-                            text: v.section_name
-                        }));
-                    });
-                    $('.selectpicker').selectpicker('refresh');
-                }
-                else{$("#sectionflag").hide();}
-            }
-        });
-      }
-
 
 </script>
 

@@ -19,11 +19,11 @@ class Teacher extends CI_Controller {
         $data['activesubmenu'] = 'student';
         $data['page_title'] = 'Student List';
         $data['baseurl'] = $this->config->item('base_url');
-		$company_id = $this->session->userdata('company_id');
-		$data['classes'] = $this->db->query("select * from classes where company_id='$company_id'")->result();
-		$data['class_id'] = $data['section_id'] = "";
+		
+		$data['classes'] = $this->db->query("select * from classes")->result();
+		$data['class_id'] = "";
 		$data['student_name']=$data['student_roll']=$data['student_mobile']="";
-		$data['sections'] = array();
+		
 		$randomkey = time();
 		$today = date("Y-m-d H:i:s");
 		
@@ -31,11 +31,9 @@ class Teacher extends CI_Controller {
 		if($this->input->post('submit')=='জমা দিন'){
 			
 			$data['class_id']=$this->input->post('class_id');
-			$data['section_id']=$this->input->post('section_id');
 			
-			if($data['section_id']>0)
-				$data['sections'] = $this->db->query("select * from sections where class_id='".$data['class_id']."' and company_id='$company_id'")->result();
 
+				
 				$this->form_validation->set_rules('student_name', 'Student Name', 'required');
 				$this->form_validation->set_rules('student_roll', 'Student Roll', 'required|callback_checkroll',array('checkroll' => 'This Roll Already Exist'));
 				// $this->form_validation->set_rules('guardian_mobile', 'Guardian Mobile No', 'required');
@@ -74,16 +72,14 @@ class Teacher extends CI_Controller {
 				$dataarray1 = array(
 					'accountgroupid'=>7,
 					'district'=>59,
-					'company_id'=>$this->session->userdata('company_id'),
 					'status'=>1,
 					'ledgername'=>$this->input->post('student_name'),
 					'father_name'=>$this->input->post('father_name'),
 					'mobile'=>$this->input->post('guardian_mobile'),
 					'image'=>$imagename,
 					'address'=>$this->input->post('student_address'),
-					'user_id'=>$this->session->userdata('user_id'),
-					'date'=>$today,
-					'company_id'=>$company_id
+					'update_by'=>$this->session->userdata('user_id'),
+					
 				);
 				$this->db->insert('accountledger', $dataarray1);
 				$ledger_id = $this->db->insert_id();
@@ -97,7 +93,7 @@ class Teacher extends CI_Controller {
 					'class_id'=>$this->input->post('class_id'),
 					'fee'=>$this->input->post('student_fee'),
 					'fee_assign'=>$today,
-					'section_id'=>$this->input->post('section_id'),
+					'update_by'=>$this->session->userdata('user_id'),
 				);
 				
 				$this->db->insert('students', $dataarray);
@@ -108,11 +104,10 @@ class Teacher extends CI_Controller {
 					'voucherid' => $randomkey, 
 					'ledgerid' => $ledger_id,
 					'date' => $today,
-					'debit' => 50,
+					'debit' => 60,
 					'credit' => 0,
 					'vouchertype' => 'Assign Fee',
 					'description' => 'ভর্তি ফী',
-					'company_id' => $this->session->userdata('company_id'),
 					'user_id' => $this->session->userdata('user_id')
 				));
 				array_push($insertdata,array(
@@ -120,25 +115,23 @@ class Teacher extends CI_Controller {
 					'ledgerid' => 7,
 					'date' => $today,
 					'debit' => 0,
-					'credit' => 50,
+					'credit' => 60,
 					'vouchertype' => 'Assign Fee',
 					'description' => 'ভর্তি ফী',
-					'company_id' => $this->session->userdata('company_id'),
 					'user_id' => $this->session->userdata('user_id')
 				));
 				$this->db->insert_batch('ledgerposting', $insertdata);	
 
 				$datalist3 = array(
 					'student_id' => $student_id,
-					'amount' => 50,
+					'amount' => 60,
 					'casuse' => 'ভর্তি ফী',
 					'assign_date' => $today,
-					'company_id' => $this->session->userdata('company_id'),
 					'user_id' => $this->session->userdata('user_id')
 				);
 				$this->db->insert('student_fee', $datalist3);
 
-				$data['student_roll'] = $this->db->query("select max(s.roll) as roll from students as s left join accountledger as l on s.ledger_id=l.id where s.class_id='".$data['class_id']."' and l.company_id='$company_id'")->row()->roll;
+				$data['student_roll'] = $this->db->query("select max(s.roll) as roll from students as s left join accountledger as l on s.ledger_id=l.id where s.class_id='".$data['class_id']."'")->row()->roll;
 				$this->session->set_userdata('success', 'নতুন তালেবে এলেম সফলভাবে সংযুক্ত হয়েছে ।');
 	        }
 		}
@@ -156,9 +149,9 @@ class Teacher extends CI_Controller {
 		  $data['page_title'] = 'Student List';
 		  $data['baseurl'] = $this->config->item('base_url');
 
-		  $company_id = $this->session->userdata('company_id');
-		  $data['classes'] = $this->db->query("select * from classes where company_id='$company_id'")->result();
-		  $data['student'] = $this->db->query("select s.*,l.ledgername as name,l.address as student_address,l.father_name,l.mobile as guardian_mobile,l.image,l.status from students as s left join accountledger as l on s.ledger_id=l.id where s.id='$id' and l.company_id='$company_id'")->row();
+		  
+		  $data['classes'] = $this->db->query("select * from classes")->result();
+		  $data['student'] = $this->db->query("select s.*,l.ledgername as name,l.address as student_address,l.father_name,l.mobile as guardian_mobile,l.image,l.status from students as s left join accountledger as l on s.ledger_id=l.id where s.id='$id'")->row();
 		  $this->load->view('teacher/edit_student',$data);
 		else :
 		  return show_error('You must be a teacher to view this page.');
@@ -170,16 +163,13 @@ class Teacher extends CI_Controller {
 		$data['activesubmenu'] = 'student';
 		$data['page_title'] = 'Student List';
 		$data['baseurl'] = $this->config->item('base_url');
-		$company_id = $this->session->userdata('company_id');		
-	    if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+		
+	    if ($this->session->userdata('loggedin') == 'yes'):
 			
 
 			if($this->input->post('submit')=='submit'):
 				$data['class_id']=$this->input->post('class_id');
-				$data['section_id']=$this->input->post('section_id');
 				
-				if($data['section_id']>0)
-					$data['sections'] = $this->db->query("select * from sections where class_id='".$data['class_id']."' and company_id='$company_id'")->result();
 					$this->form_validation->set_rules('student_name', 'Student Name', 'required');
 					$this->form_validation->set_rules('guardian_mobile', 'Guardian Mobile No', 'required');
 	
@@ -230,14 +220,12 @@ class Teacher extends CI_Controller {
 						'mother_name'=>$this->input->post('mother_name'),
 						'guardian_name'=>$this->input->post('guardian_name'),
 						'class_id'=>$this->input->post('class_id'),
-						'section_id'=>$this->input->post('section_id'),
 						'fee'=>$this->input->post('student_fee'),
 						'update_by'=>$this->session->userdata('user_id'),
-						'update_date'=>date("Y-m-d H:i:s")
 					);
 					$this->db->where('id', $this->input->post('studentid'));
 					$this->db->update('students', $dataarray);
-					redirect('teacher/students_list/'.$data['class_id'].'/'.$data['section_id'].'/#tr-'.$this->input->post('studentid'));
+					redirect('teacher/students_list/'.$data['class_id'].'/#tr-'.$this->input->post('studentid'));
 				}
 			endif;
 	  else:
@@ -250,31 +238,24 @@ class Teacher extends CI_Controller {
 		$data['activesubmenu'] = 'student';
 		$data['page_title'] = 'Student List';
 		$data['baseurl'] = $this->config->item('base_url');
-		$company_id = $this->session->userdata('company_id');
-	    if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+		
+	    if ($this->session->userdata('loggedin') == 'yes'):
 			
-			$data['classes'] = $this->db->query("select * from classes where company_id='$company_id'")->result();
+			$data['classes'] = $this->db->query("select * from classes")->result();
 			if($this->input->post('class_id')){
 				$data["class_id"] = $this->input->post('class_id');
-	  			$data["section_id"] = $this->input->post('section_id');
-	  			$data["class_name"] = $this->db->query("select class_name from classes where id='".$data['class_id']."' and company_id='$company_id'")->row()->class_name;
-	  			if(empty($data["section_id"])){
-	  				$data["section_name"] = "";
-					  $data['section_id'] = 0;
-					  $data["studentlist"] = $this->db->query("select s.*,l.ledgername as name,l.address as student_address,l.father_name,l.mobile as guardian_mobile,l.image,l.status from students as s left join accountledger as l on s.ledger_id=l.id where s.class_id=".$data["class_id"]." and l.company_id='$company_id'")->result(); 
+	  		
+	  			$data["class_name"] = $this->db->query("select class_name from classes where id='".$data['class_id']."'")->row()->class_name;
+	  			
+	  				
+				$data["studentlist"] = $this->db->query("select s.*,l.ledgername as name,l.address as student_address,l.father_name,l.mobile as guardian_mobile,l.image,l.status from students as s left join accountledger as l on s.ledger_id=l.id where s.class_id=".$data["class_id"]." order by s.roll")->result(); 
 					  
-				}
-				else{
-					$data['section_id'] = $this->input->post('section_id');
-					$data["section_name"] = $this->db->query("select section_name from sections where id='".$data['section_id']."' and company_id='$company_id'")->row()->section_name;
-					$data["studentlist"] = $this->db->query("select s.* from students as s left join accoutnledger as l on s.ledger_id=l.id where s.class_id='".$data["class_id"]."' and l.company_id='$company_id'")->result();
-
-				}
+				
+				
 	  			$this->load->view('teacher/attendance',$data);
 			}
 			else{
 				$data['class_id'] = "";
-				$data['section_id'] = "";
 				$this->load->view('teacher/attendance',$data);
 			}
 	  else :
@@ -284,7 +265,7 @@ class Teacher extends CI_Controller {
 	}
 
 	public function saveattendance(){
-		if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):	
+		if ($this->session->userdata('loggedin') == 'yes'):	
 	  	$id=$this->input->post('roll[]');
 		$attendance_id=$this->input->post('attendance_id[]');
 		if(empty($attendance_id)){
@@ -292,7 +273,7 @@ class Teacher extends CI_Controller {
 		}
 		$att=$this->input->post('attendance[]');
 		$class_name=$this->input->post('class_name');
-		$company_id = $this->session->userdata('company_id');
+		
 		$insertdata = array();
 		$maxid=count($id);
 		if(count($attendance_id)>0){
@@ -300,7 +281,6 @@ class Teacher extends CI_Controller {
 				array_push($insertdata,array(
 	                'id' => $attendance_id[$i],
 	                'attendance' => $att[$i],
-	                'update_date' => date("Y-m-d"),
 	                'update_by' => $this->session->userdata('user_id')
 	        	));
 			}
@@ -313,9 +293,9 @@ class Teacher extends CI_Controller {
 				array_push($insertdata,array(
 					'student_id' => $id[$i],
 					'attendance' => $att[$i],
-					'insert_date' => date("Y-m-d"),
-					'insert_by' => $this->session->userdata('user_id'),
-					'company_id'=>$company_id
+					'create_by' => $this->session->userdata('user_id'),
+					'update_by' => $this->session->userdata('user_id')
+					
 				));
 			}
 			$this->db->insert_batch('attendance', $insertdata);
@@ -327,30 +307,21 @@ class Teacher extends CI_Controller {
 	  endif;
 	}
 
-	public function students_list($classid=2,$sectionid=0){
+	public function students_list($classid=2){
 		$data['activemenu'] = 'report';
 		$data['activesubmenu'] = 'studentlist';
 		$data['page_title'] = 'Student List';
 		$data['baseurl'] = $this->config->item('base_url');
 		if($this->session->userdata('role')=='teacher'||$this->session->userdata('role')=='admin'):
-		$company_id = $this->session->userdata('company_id');
-		$data['classes'] = $this->db->query("select * from classes where company_id='$company_id'")->result();
-		$data["class_id"]=$data["section_id"] = 0;
+		
+		$data['classes'] = $this->db->query("select * from classes")->result();
+		$data["class_id"] = $classid;
 		$data["studentlist"] = array();
-		if(!empty($this->input->post('class_id')||$classid>0)){
-			if($classid>0){
-				$data["class_id"] = $classid;
-				$data["section_id"] = $sectionid;
-			}
-			else{
-			$data["class_id"] = $this->input->post('class_id');
-			$data["section_id"] = $this->input->post('section_id');
-			}
-  			$data['sections'] = $this->db->query("select * from sections where class_id='".$data['class_id']."' and company_id='$company_id'")->result();
-  			if(empty($this->input->post('section_id'))||$this->input->post('section_id')=="")
-  				$data["section_id"] = 0;
-  			$data["studentlist"] = $this->db->query("select s.*,(select sum(amount)-sum(paid) from student_fee where student_id=s.id and step=0) as due,l.ledgername as name,l.address as student_address,l.father_name,l.mobile as guardian_mobile,l.image,l.status from students as s left join accountledger as l on s.ledger_id=l.id  where s.class_id=".$data["class_id"]." and l.company_id='$company_id'")->result(); 
+		if($this->input->post('class_id')){
+			$classid = $data["class_id"] = $this->input->post('class_id');
 		}
+		$data["studentlist"] = $this->db->query("select s.*,(select sum(amount)-sum(paid) from student_fee where student_id=s.id and step=0) as due,l.ledgername as name,l.address as student_address,l.father_name,l.mobile as guardian_mobile,l.image,l.status from students as s left join accountledger as l on s.ledger_id=l.id  where s.class_id=".$data["class_id"]." order by s.roll asc")->result();
+
 		$this->load->view('teacher/students_list',$data);
 
 	  else :
@@ -365,12 +336,12 @@ class Teacher extends CI_Controller {
 		$data['baseurl'] = $this->config->item('base_url');
 		
 		if($this->session->userdata('role')=='teacher'||$this->session->userdata('role')=='admin'):
-			$edate = $data['edate'] = date('Y-m-d');
-			$sdate = $data['sdate'] = date('Y-m-01');
+			$edate = $data['edate'] = date('Y-m-d 23:59:59');
+			$sdate = $data['sdate'] = date('Y-m-01 00:00:00');
 			
 			$data['students'] = $this->db->query("select s.id,s.roll,l.ledgername from students as s left join accountledger as l on s.ledger_id=l.id where s.class_id='$class_id'")->result();
 			
-			$data['dates'] = $this->db->query("select insert_date from attendance where student_id='".$data['students'][0]->id."' and insert_date between '$sdate' and '$edate'")->result();
+			$data['dates'] = $this->db->query("select update_at from attendance where student_id='".$data['students'][0]->id."' and update_at between '$sdate' and '$edate'")->result();
 			
 			$this->load->view('teacher/attendance_report',$data);
 
@@ -383,10 +354,10 @@ class Teacher extends CI_Controller {
 
 	function sales(){
 			$data['baseurl'] = $this->config->item('base_url');
-			if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+			if ($this->session->userdata('loggedin') == 'yes'):
 				$nettotal_price = 0;
 		
-				$company_id = $this->session->userdata('company_id');
+				
 				$user_id = $this->session->userdata('user_id');
 				$customer_id = $this->input->post('ledger_id');
 				$invoiceid = time();
@@ -437,9 +408,8 @@ class Teacher extends CI_Controller {
 						'profit' => $profit,
 						'quantity' => $quantity,
 						'paid' => $paid,
-						'date' => $today,
 						'devcomment' => json_encode($devcomment),
-						'company_id' => $company_id
+						
 					);
 					
 					$this->db->insert('daily_sell', $datalist);
@@ -451,48 +421,43 @@ class Teacher extends CI_Controller {
 				array_push($insertdata,array(
 					'voucherid' => $invoiceid,
 					'ledgerid' => $d_ledgerid,
-					'date' => $today,
 					'vouchertype' => 'sales',
 					'debit' => '0',
 					'credit' => ($price*$quantity),
 					'description' => "Inv-". sprintf("%06d", $INSERT_ID),
 					'user_id'=>$user_id,
-					'company_id' => $this->session->userdata('company_id')
+					
 				));
 				
 				array_push($insertdata,array(
 					'voucherid' => $invoiceid,
 					'ledgerid' => $customer_id,
-					'date' => $today,
 					'vouchertype' => 'sales',
 					'debit' =>($price*$quantity),
 					'credit' => '0',
 					'user_id'=>$user_id,
 					'description' => "Inv-". sprintf("%06d", $INSERT_ID),
-					'company_id' => $this->session->userdata('company_id')
+					
 				));
 
 				if($paid!=0){
 					array_push($insertdata,array(
 						'voucherid' => $invoiceid, 
                         'ledgerid' => $customer_id,
-                        'date' => $today,
                         'debit' => 0,
                         'credit' => $paid,
                         'vouchertype' => 'Receive Voucher',
                         'description' => "Inv-". sprintf("%06d", $INSERT_ID),
-                        'company_id' => $this->session->userdata('company_id'),
 						'user_id' => $this->session->userdata('user_id')
 					));
 					array_push($insertdata,array(
 						'voucherid' => $invoiceid,
                         'ledgerid' => 1,
-                        'date' =>$today,
                         'debit' => $paid,
                         'credit' => 0,
                         'vouchertype' => 'Receive Voucher',
                         'description' => "Inv-". sprintf("%06d", $INSERT_ID),
-                        'company_id' => $this->session->userdata('company_id'),
+                   
                         'user_id' => $this->session->userdata('user_id')
 					));
 				}
@@ -506,7 +471,6 @@ class Teacher extends CI_Controller {
 					'paid_date'=>$today,
 					'casuse' => $getpdetails->product_name." ".number_format($quantity)." ".$getpdetails->unitname,
 					'assign_date' => $today,
-					'company_id' => $this->session->userdata('company_id'),
 					'user_id' => $this->session->userdata('user_id')
 				);
 				$this->db->insert('student_fee', $datalist3);
@@ -524,11 +488,11 @@ class Teacher extends CI_Controller {
 	// --------------------student fee----------------------
 	function employee_salary(){
         $data['baseurl'] = $this->config->item('base_url');
-        $comid = $this->session->userdata('company_id');
+  
         $data['activemenu'] = 'Employee';
         $data['activesubmenu'] = 'employee_salary';
     
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $check_array=array();
             $data['salarylist']  = $this->db->query("select employee.*,accountledger.ledgername,accountledger.description from employee left join accountledger on employee.employee_id = accountledger.id")->result();
             foreach ($data['salarylist'] as $key) {
@@ -546,47 +510,40 @@ class Teacher extends CI_Controller {
     } 
 
     function assign_fee(){
-		$pmonth = date('M-Y', strtotime('-1 month'));
-		//$pmonth = date('M-Y', strtotime($pmonth));
+		//$pmonth = date('M-Y', strtotime('-1 month'));
+		$pmonth = date('M-Y');
 		
         $data['baseurl'] = $this->config->item('base_url');
-		$company_id = $this->session->userdata('company_id');
+		
         if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('roll') != 'admin'):
-            $students = $this->db->query("select s.* from students as s left join accountledger as l on s.ledger_id=l.id where l.status=1 and l.company_id='$company_id'")->result();
-            $month = date('Y-m');
-			
+            $students = $this->db->query("select s.* from students as s left join accountledger as l on s.ledger_id=l.id where l.status=1")->result();
             $todate = date('Y-m-d H:i:s');
             $randomkey = time(); $i=0;
 			$insertdata=array();
 			$datalist3=array();
 			$updateArray=array();
             foreach ($students as $key) {
-                $pamonth = date('Y-m',strtotime($key->fee_assign));
-				
-                if($pamonth<$month) 
-                { 
+
                     $i++; 
 					$rkey=$randomkey.$i;
 					array_push($insertdata,array(
 						'voucherid' => $rkey, 
                         'ledgerid' => $key->ledger_id,
-                        'date' => $todate,
                         'debit' => $key->fee,
                         'credit' => 0,
                         'vouchertype' => 'Assign Fee',
                         'description' => $pmonth,
-                        'company_id' => $this->session->userdata('company_id'),
+                        
 						'user_id' => $this->session->userdata('user_id')
 					));
 					array_push($insertdata,array(
 						'voucherid' => $rkey,
                         'ledgerid' => 7,
-                        'date' => $todate,
                         'debit' => 0,
                         'credit' => $key->fee,
                         'vouchertype' => 'Assign Fee',
                         'description' => $pmonth,
-                        'company_id' => $this->session->userdata('company_id'),
+                        
                         'user_id' => $this->session->userdata('user_id')
 					));
 					
@@ -599,20 +556,17 @@ class Teacher extends CI_Controller {
 						'voucherid' => $rkey,
                         'student_id' => $key->id,
                         'amount' => $key->fee,
-                        'casuse' => 'বেতন '.$pmonth,
+                        'casuse' => 'হাদিয়া '.$pmonth,
                         'assign_date' => $todate,
-                        'company_id' => $this->session->userdata('company_id'),
                         'user_id' => $this->session->userdata('user_id')
                     ));
-                    
-                }  
             }
 
 			$this->db->insert_batch('ledgerposting', $insertdata);
 			$this->db->insert_batch('student_fee', $datalist3);
 			$this->db->update_batch('students',$updateArray, 'id');
 
-            $this->session->set_userdata('success',$i.' তালেবে এলেমের বেতন নির্ধারণ করা হয়েছে ।');
+            $this->session->set_userdata('success',$i.' তালেবে এলেমের হাদিয়া নির্ধারণ করা হয়েছে ।');
             redirect(base_url());
         else:
 			$this->session->set_userdata('failed',' শুধু অ্যাডমিন প্রবেশ করতে পারবে ।');
@@ -625,8 +579,8 @@ class Teacher extends CI_Controller {
 		$data['activesubmenu'] = 'studentlist';
 		$data['page_title'] = 'Student List';
 		$data['baseurl'] = $this->config->item('base_url');
-		$company_id = $this->session->userdata('company_id');
-        if ($this->session->userdata('loggedin') == 'yes' && $company_id != ''):
+	
+        if ($this->session->userdata('loggedin') == 'yes'):
 			if($this->input->post('submit')=='submit'):
 				$student_id = $this->input->post('student_id');
 				$ledger_id = $this->input->post('ledger_id');
@@ -642,23 +596,23 @@ class Teacher extends CI_Controller {
 					array_push($insertdata,array(
 						'voucherid' => $randomkey, 
                         'ledgerid' => $ledger_id,
-                        'date' => $todate,
+                   
                         'debit' => $amount,
                         'credit' => 0,
                         'vouchertype' => 'Assign Fee',
                         'description' => $cause.$pmonth,
-                        'company_id' => $this->session->userdata('company_id'),
+                        
 						'user_id' => $this->session->userdata('user_id')
 					));
 					array_push($insertdata,array(
 						'voucherid' => $randomkey,
                         'ledgerid' => 7,
-                        'date' => $todate,
+                      
                         'debit' => 0,
                         'credit' => $amount,
                         'vouchertype' => 'Assign Fee',
                         'description' => $cause.$pmonth,
-                        'company_id' => $this->session->userdata('company_id'),
+                        
                         'user_id' => $this->session->userdata('user_id')
 					));
 					$this->db->insert_batch('ledgerposting', $insertdata);
@@ -672,7 +626,7 @@ class Teacher extends CI_Controller {
                         'amount' => $amount,
                         'casuse' => $cause.$pmonth,
                         'assign_date' => $todate,
-                        'company_id' => $this->session->userdata('company_id'),
+                        
                         'user_id' => $this->session->userdata('user_id')
                     );
                     $this->db->insert('student_fee', $datalist3);
@@ -688,10 +642,10 @@ class Teacher extends CI_Controller {
 
 	function allassign_fees(){
 		$data['baseurl'] = $this->config->item('base_url');
-		$company_id = $this->session->userdata('company_id');
+		
         if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('role') == 'admin'):
 			$class_id = $this->input->post('class_id');
-            $students = $this->db->query("select s.* from students as s left join accountledger as l on s.ledger_id=l.id where l.status=1 and l.company_id='$company_id' and s.class_id='$class_id'")->result();
+            $students = $this->db->query("select s.* from students as s left join accountledger as l on s.ledger_id=l.id where l.status=1 and s.class_id='$class_id'")->result();
 			$year = $this->input->post('year');
 			$month = $this->input->post('month');
 			$cause = $this->input->post('cause');
@@ -709,23 +663,23 @@ class Teacher extends CI_Controller {
 					array_push($insertdata,array(
 						'voucherid' => $rkey, 
                         'ledgerid' => $key->ledger_id,
-                        'date' => $todate,
+                      
                         'debit' => $amount,
                         'credit' => 0,
                         'vouchertype' => 'Assign Fee',
                         'description' => $cause.$pmonth,
-                        'company_id' => $this->session->userdata('company_id'),
+                       
 						'user_id' => $this->session->userdata('user_id')
 					));
 					array_push($insertdata,array(
 						'voucherid' => $rkey,
                         'ledgerid' => 7,
-                        'date' => $todate,
+                      
                         'debit' => 0,
                         'credit' => $amount,
                         'vouchertype' => 'Assign Fee',
                         'description' => $cause.$pmonth,
-                        'company_id' => $this->session->userdata('company_id'),
+                        
                         'user_id' => $this->session->userdata('user_id')
 					));
 					
@@ -740,7 +694,7 @@ class Teacher extends CI_Controller {
                         'amount' => $amount,
                         'casuse' => $cause.$pmonth,
                         'assign_date' => $todate,
-                        'company_id' => $this->session->userdata('company_id'),
+                       
                         'user_id' => $this->session->userdata('user_id')
                     );
                     
@@ -761,10 +715,10 @@ class Teacher extends CI_Controller {
 		$data['activemenu'] = 'report';
 		$data['activesubmenu'] = 'studentlist';
 		$data['page_title'] = 'Student List';
-		$student = $this->db->query("Select s.call_name,s.class_id,s.section_id,s.ledger_id,l.mobile from students as s left join accountledger as l on s.ledger_id=l.id where s.id='".$student_id."'")->row();
+		$student = $this->db->query("Select s.call_name,s.class_id,s.ledger_id,l.mobile from students as s left join accountledger as l on s.ledger_id=l.id where s.id='".$student_id."'")->row();
 		$data['baseurl'] = $this->config->item('base_url');
-		$company_id = $this->session->userdata('company_id');
-        if ($this->session->userdata('loggedin') == 'yes' && $company_id != ''):
+		
+        if ($this->session->userdata('loggedin') == 'yes' ):
 			if($this->input->post('submit')=='submit'):
 				
 				$assign_fee=$this->input->post('assign_fee[]');
@@ -799,23 +753,23 @@ class Teacher extends CI_Controller {
 					array_push($insertdata,array(
 						'voucherid' => $rkey, 
                         'ledgerid' => $student->ledger_id,
-                        'date' => $todate,
+                     
                         'debit' => 0,
                         'credit' => $paidamount[$i],
                         'vouchertype' => 'Receive Fee',
                         'description' => $casuse[$i],
-                        'company_id' => $this->session->userdata('company_id'),
+                        
 						'user_id' => $this->session->userdata('user_id')
 					));
 					array_push($insertdata,array(
 						'voucherid' => $rkey,
                         'ledgerid' => 1,
-                        'date' => $todate,
+                      
                         'debit' => $paidamount[$i],
                         'credit' => 0,
                         'vouchertype' => 'Receive Fee',
                         'description' => $casuse[$i],
-                        'company_id' => $this->session->userdata('company_id'),
+                        
                         'user_id' => $this->session->userdata('user_id')
 					));
 					
@@ -852,7 +806,6 @@ class Teacher extends CI_Controller {
 					$smsdata = array(
 						'number'=> $number,
 						'sms_text' => $message,
-						'date' => date("Y-m-d H:i:s"),
 						'status' => $arrayData['response_code'],
 						'message_id' => $arrayData['message_id'],
 						'success_message' => $arrayData['success_message'],
@@ -862,14 +815,14 @@ class Teacher extends CI_Controller {
 					$this->db->insert('smslog', $smsdata);
 				}
 				$this->session->set_userdata('success', 'তালেবে এলেমের '.$totalamount.' টাকা সফল ভাবে জমা হয়েছে ।');
-				redirect('teacher/students_list/'.$student->class_id.'/'.$student->section_id.'/#tr-'.$student_id);
+				redirect('teacher/students_list/'.$student->class_id.'/#tr-'.$student_id);
                   
 			else:
 			$data['assignfee'] = $this->db->query("select * from student_fee where student_id='$student_id' and amount<>paid and step=0")->result();
 
 			$data['assignfeepaid'] = $this->db->query("select * from student_fee where student_id='$student_id' and (amount=paid or step=1)")->result();
 
-			$data['student'] = $this->db->query("select s.*,l.ledgername as name,l.address as student_address,l.father_name,l.mobile as guardian_mobile,l.image,l.status from students as s left join accountledger as l on s.ledger_id=l.id where s.id='$student_id' and l.company_id='$company_id'")->row();
+			$data['student'] = $this->db->query("select s.*,l.ledgername as name,l.address as student_address,l.father_name,l.mobile as guardian_mobile,l.image,l.status from students as s left join accountledger as l on s.ledger_id=l.id where s.id='$student_id' ")->row();
 			
 			$this->load->view('teacher/receive_fee',$data);
 			endif;
@@ -922,8 +875,8 @@ class Teacher extends CI_Controller {
 		$edate = date('Y-m-t 23:59:59');
 		
 		$data['baseurl'] = $this->config->item('base_url');
-		$company_id = $this->session->userdata('company_id');
-        if ($this->session->userdata('loggedin') == 'yes' && $company_id != ''):
+		
+        if ($this->session->userdata('loggedin') == 'yes'):
 			$user_id = $this->session->userdata("user_id");
 			$data['notpaid'] = $this->db->query("select l.credit,l.description,l.date,l.ledgerid,a.ledgername,a.address,a.mobile,c.class_name,s.roll from ledgerposting as l left join accountledger as a on l.ledgerid=a.id left join students as s on l.ledgerid=s.ledger_id left join classes as c on s.class_id=c.id where l.vouchertype = 'Receive Fee' and l.ledgerid<>1 and l.user_id='$user_id' and l.randomkey='0000-00-00 00:00:00'")->result();
 
@@ -937,10 +890,10 @@ class Teacher extends CI_Controller {
 
 	//--------------------------
 	public function smstoadmin($amouunt){
-		$company_id = $this->session->userdata('company_id');
+		
 		$user_id = $this->session->userdata('user_id');
 		$data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $company_id != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
 			$message = $this->session->set_userdata('fullname')." ".$amouunt." টাকা দিয়েছে ?"."\n".$data['baseurl']."teacher/radmin/yes/".$user_id;
 			//smsWhatsappAdmin($message);
 			redirect('home');
@@ -963,10 +916,10 @@ class Teacher extends CI_Controller {
 		$data['activesubmenu'] = 'student';
 		$data['page_title'] = 'Student List';
 		$data['baseurl'] = $this->config->item('base_url');
-		$company_id = $this->session->userdata('company_id');
-	    if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+		
+	    if ($this->session->userdata('loggedin') == 'yes'):
 			
-			$data['classes'] = $this->db->query("select * from classes where company_id='$company_id'")->result();
+			$data['classes'] = $this->db->query("select * from classes")->result();
 			if($this->input->post('class_id')){
 				$class_id= $this->input->post('class_id');
 	  			$smsbody = $this->input->post('smsbody');
@@ -978,7 +931,6 @@ class Teacher extends CI_Controller {
 			}
 			else{
 				$data['class_id'] = "";
-				$data['section_id'] = "";
 				$this->load->view('teacher/smssend',$data);
 			}
 	  else :
@@ -992,11 +944,9 @@ class Teacher extends CI_Controller {
 	public function checkroll(){
 		$roll = $this->input->post('student_roll');
 		$class_id = $this->input->post('class_id');
-		$section_id = $this->input->post('section_id');
-		if($section_id==""||$section_id==null)
-			$section_id = 0;
+	
 		
-		$array = array('roll' => $roll, 'class_id' => $class_id, 'section_id' => $section_id);
+		$array = array('roll' => $roll, 'class_id' => $class_id);
 		$this->db->where($array);
 	    $query = $this->db->get('students');
 	    
@@ -1027,7 +977,6 @@ class Teacher extends CI_Controller {
         	'call_name' => $this->input->post('call_name'),
         	'roll' => $this->input->post('roll'),
         	'guardian_name' => $this->input->post('guardian_name'),
-        	'update_date' => date("Y-m-d"),
 	        'update_by' => $this->session->userdata('user_id')
         );
 		$this->db->where('id', $this->input->post('id'));
@@ -1036,8 +985,7 @@ class Teacher extends CI_Controller {
 
 	public function getmaxroll(){
 		$id = $this->input->post('id');
-		$company_id = $this->session->userdata('company_id');
-		$mroll = $this->db->query("select max(s.roll) as roll from students as s left join accountledger as l on s.ledger_id=l.id where s.class_id='$id' and l.company_id='$company_id'")->row()->roll;
+		$mroll = $this->db->query("select max(s.roll) as roll from students as s left join accountledger as l on s.ledger_id=l.id where s.class_id='$id'")->row()->roll;
 		echo json_encode($mroll+1);
 	}
 }

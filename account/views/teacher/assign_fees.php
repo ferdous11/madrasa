@@ -58,47 +58,5 @@
             
    }
 
-   function getsection(id){
-        
-        var postdata = 'id=' + id;
-        // console.log(id);
-        $.ajax({
-            type: 'POST',
-            url: '<?php echo site_url("teacher/getsection"); ?>',
-            data: postdata,
-            success: function (response) {
-                var jsonObject = jQuery.parseJSON(response);
-                // console.log(jsonObject);
-                $("#student_section").find('option').remove().end();
-                
-                $("#student_section").append($('<option>', {
-                        value: '' ,
-                        text: 'Select Section'
-                }));
-
-               
-                if(Object.keys(jsonObject).length>0){
-                    $("#sectionflag").show();
-                    $.each( jsonObject, function( r,v) {
-                        
-                        $("#student_section").append($('<option>', {
-                            value: v.id,
-                            text: v.section_name
-                        }));
-                    });
-                    $('.selectpicker').selectpicker('refresh');
-                }
-
-                else{
-                    $("#sectionflag").hide();
-                }
-                
-                
-  
-            }
-        });
-    }
-
-
 </script>
 

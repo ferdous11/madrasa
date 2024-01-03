@@ -56,7 +56,7 @@
                                 <tr>                                    
                                     <th>Roll</th>                                    
                                     <th>Name</th>
-                                    <?php foreach ($dates as $day): echo"<th>".date('d',strtotime($day->insert_date))."</th>"; endforeach;?>
+                                    <?php foreach ($dates as $day): echo"<th>".date('d',strtotime($day->update_at))."</th>"; endforeach;?>
                                     <th>T.P</th>
                                     <th>T.A</th>
                                 </tr>
@@ -66,7 +66,7 @@
                               
                                     foreach ($students as $student): $ta=0;$tp=0;
                                         echo "<tr><td>".$student->roll."</td><td>".$student->ledgername."</td>"; 
-                                        $att = $this->db->query("select insert_date,attendance from attendance where student_id='".$student->id."' and insert_date between '$sdate' and '$edate'")->result(); 
+                                        $att = $this->db->query("select update_at,attendance from attendance where student_id='".$student->id."' and update_at between '$sdate' and '$edate'")->result(); 
                                         $d = count($dates) - count($att);
                                         while($d){
                                             echo "<td></td>";$d--;

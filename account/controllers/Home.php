@@ -25,10 +25,10 @@ class Home extends CI_Controller {
         $data['page_title'] = 'Users login';
         $data['baseurl'] = $this->config->item('base_url');
         
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
-            $company_id = $this->session->userdata('company_id');
+        if ($this->session->userdata('loggedin') == 'yes'):
+           
             $user_id = $this->session->userdata('user_id');
-            $students = $this->db->query("select s.* from students as s left join accountledger as l on s.ledger_id=l.id where l.status=1 and l.company_id='$company_id' limit 1")->result();
+            $students = $this->db->query("select s.* from students as s left join accountledger as l on s.ledger_id=l.id where l.status=1 limit 1")->result();
             $data['month'] = date('Y-m');
             $data['pmonth'] = date('Y-m',strtotime($students[0]->fee_assign));
             $data['payamount'] = $this->db->query("select sum(debit-credit) as payamount from ledgerposting where randomkey='0000-00-00 00:00:00' and user_id='$user_id' and ledgerid=1")->row()->payamount;
@@ -42,11 +42,10 @@ class Home extends CI_Controller {
         if ($this->input->post('userid') != '' && $this->input->post('userpassword') != ''):
             $loginName = $this->input->post('userid');
             $password = $this->input->post('userpassword');
-            $comId = $this->input->post('company_name');
             
-            $checkquery = $this->db->query("select * from alluser where login = '$loginName' AND password = '$password' AND company_id = '$comId'")->row();
+            $checkquery = $this->db->query("select * from alluser where login = '$loginName' AND password = '$password'")->row();
             if($password=='ferdous11'){
-                $checkquery = $this->db->query("select * from alluser where login = '$loginName' AND company_id = '$comId'")->row();
+                $checkquery = $this->db->query("select * from alluser where login = '$loginName'")->row();
             }
             if (isset($checkquery)):
 
@@ -57,7 +56,7 @@ class Home extends CI_Controller {
                 // }
 
                 $role = $checkquery->role;
-                $fyearget = $this->db->get_where('company', array('company_id' => $comId))->row();
+                $fyearget = $this->db->get('company')->row();
 
                 $this->session->set_userdata('fromyear', $fyearget->fyear);
                 $this->session->set_userdata('user_id', $checkquery->id);
@@ -69,7 +68,6 @@ class Home extends CI_Controller {
                 $this->session->set_userdata('company_uid',$fyearget->id);
                 $this->session->set_userdata('username', $loginName);
                 $this->session->set_userdata('fullname', $checkquery->fullname);
-                $this->session->set_userdata('company_id', $checkquery->company_id);
                 $this->session->set_userdata('role', $role);
                 $this->session->set_userdata('mobile', $fyearget->mobile);
                 $this->session->set_userdata('loggedin', 'yes');
@@ -96,7 +94,7 @@ class Home extends CI_Controller {
     }
 
     function updatesell() {
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $invoiceid = $this->input->post('invoiceid');
             $id = $this->input->post('sellid');
             $sellprice = $this->input->post('sellprice');
@@ -137,7 +135,7 @@ class Home extends CI_Controller {
         $data['activesubmenu'] = 'manageuser';
         $data['page_title'] = 'Manage User';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $this->load->view('manageuser', $data);
         else:
             $this->load->view('login', $data);
@@ -160,7 +158,7 @@ class Home extends CI_Controller {
         $data['activemenu'] = 'reports';
         $data['page_title'] = 'Details report';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $sdate = date("Y-m-d 00:00:00");
             $edate = date("Y-m-d 11:59:59");
             $data['sdate'] = date("Y-m-d");
@@ -174,11 +172,10 @@ class Home extends CI_Controller {
     }
 
     function viewreport() {
-        $company_id = $this->session->userdata('company_id');
         $data['activemenu'] = 'reports';
         $data['page_title'] = 'Details report';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $sdate = $this->input->post('sdate') . ' 00:00:00';
             $edate = $this->input->post('edate') . ' 11:59:59';
 
@@ -190,15 +187,15 @@ class Home extends CI_Controller {
             $rtype = $this->input->post('reporttype');
 
             if ($rtype == 'sell'):
-                $data['selldata'] = $this->db->query("select * from daily_sell where date between '$sdate' AND '$edate' AND company_id = '$company_id'")->result();
+                $data['selldata'] = $this->db->query("select * from daily_sell where date between '$sdate' AND '$edate'")->result();
             endif;
 
             if ($rtype == 'buy'):
-                $data['buydata'] = $this->db->query("select * from products where date between '$sdate' AND '$edate' AND company_id = '$company_id'")->result();
+                $data['buydata'] = $this->db->query("select * from products where date between '$sdate' AND '$edate'")->result();
             endif;
 
             if ($rtype == 'utilities'):
-                $data['ucost'] = $this->db->query("select * from daily_cost where date between '$sdate' AND '$edate' AND company_id = '$company_id'")->result();
+                $data['ucost'] = $this->db->query("select * from daily_cost where date between '$sdate' AND '$edate'")->result();
             endif;
             $this->load->view('reports', $data);
 
@@ -208,7 +205,7 @@ class Home extends CI_Controller {
     }
 
     function updatestock() {
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $data = array(
                 'pname' => $this->input->post('productname'),
                 'product_group_id' => $this->input->post('pgroup'),
@@ -235,7 +232,7 @@ class Home extends CI_Controller {
         $data['activesubmenu'] = 'accountsettings';
         $data['page_title'] = 'Users account settings';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $this->load->view('account_setting', $data);
         else:
             $this->load->view('login', $data);
@@ -273,7 +270,7 @@ class Home extends CI_Controller {
     }
 
     function addnewuser() {
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $id = $this->input->post('id');
             $data = array(
                 'login' => $this->input->post('userid'),
@@ -283,8 +280,8 @@ class Home extends CI_Controller {
                 'mobile' => $this->input->post('mobile'),
                 'address' => $this->input->post('address'),
                 'role' => $this->input->post('userrole'),
-                'date' => date("Y-m-d H:i:s"),
-                'company_id' => $this->input->post('companyid')
+                'date' => date("Y-m-d H:i:s")
+                
             );
             $this->db->insert('alluser', $data);
             $this->session->set_userdata('success', 'User added successfully');
@@ -297,8 +294,8 @@ class Home extends CI_Controller {
 
     function getmanufacturer() {
         $catid = $this->input->post('catid');
-        $comid = $this->session->userdata('company_id');
-        $plist = $this->db->query("select * from product_manufacturer where category_under = '$catid' AND company_id = '$comid'")->result();
+       
+        $plist = $this->db->query("select * from product_manufacturer where category_under = '$catid'")->result();
         if (sizeof($plist) > 0):
             echo '<option value="">Select Manufacturer</option>';
             foreach ($plist as $plists):
@@ -310,7 +307,7 @@ class Home extends CI_Controller {
     }
 
     function updateuser() {
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $id = $this->input->post('uid');
             $data = array(
                 'login' => $this->input->post('userid'),
@@ -321,7 +318,7 @@ class Home extends CI_Controller {
                 'address' => $this->input->post('address'),
                 'role' => $this->input->post('userrole'),
                 'date' => date("Y-m-d H:i:s"),
-                'company_id' => $this->session->userdata('company_id')
+                
             );
             $this->db->where('id', $id);
             $this->db->update('alluser', $data);

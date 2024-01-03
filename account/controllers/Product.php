@@ -24,21 +24,20 @@ class Product extends CI_Controller {
         $data['activesubmenu'] = 'products';
         $data['page_title'] = 'Products';
         $data['baseurl'] = $this->config->item('base_url');
-        $companyid = $this->session->userdata('company_id');
         $data['class_id'] = 1;
     
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
 
-            $data['classes'] = $this->db->query("select id,class_name from classes where company_id ='".$companyid."' order by id asc")->result();
+            $data['classes'] = $this->db->query("select id,class_name from classes order by id asc")->result();
 
             if($this->input->post('class_id'))
             {
                 $data['section_id'] = $section_id = $this->input->post('section_id');
                 $data['class_id'] = $class_id = $this->input->post('class_id');
-                $data['product'] = $this->db->query("select p.*,u.name  as unit_name,au.fullname,c.class_name,sc.section_name  from products as p left join product_unit as u on p.unit_id=u.id left join classes as c on p.class_id=c.id left join sections as sc on p.section_id=sc.id left join alluser as au on p.user_id=au.id where p.company_id='$companyid' and p.class_id='$class_id' order by p.product_name asc")->result();
+                $data['product'] = $this->db->query("select p.*,u.name  as unit_name,au.fullname,c.class_name from products as p left join product_unit as u on p.unit_id=u.id left join classes as c on p.class_id=c.id left join alluser as au on p.user_id=au.id where p.class_id='$class_id' order by p.product_name asc")->result();
             }
             else{
-                $data['product'] = $this->db->query("select p.*,u.name  as unit_name,au.fullname,c.class_name,sc.section_name  from products as p left join product_unit as u on p.unit_id=u.id left join classes as c on p.class_id=c.id left join sections as sc on p.section_id=sc.id left join alluser as au on p.user_id=au.id where p.company_id='$companyid' order by p.product_name asc")->result();
+                $data['product'] = $this->db->query("select p.*,u.name  as unit_name,au.fullname,c.class_name from products as p left join product_unit as u on p.unit_id=u.id left join classes as c on p.class_id=c.id left join alluser as au on p.user_id=au.id order by p.product_name asc")->result();
             }
             $this->load->view('product_derectory/product', $data);
         else:
@@ -47,21 +46,20 @@ class Product extends CI_Controller {
     }
 
     function export_product() {
-        $companyid = $this->session->userdata('company_id');
         
         $category = $this->session->userdata('catagory_id');
         $sub_category = $this->session->userdata('subcategory_id');
 
         if($sub_category==-1&&$category!=-1){
-        $product = $this->db->query("select p.*,u.name  as unit_name,au.fullname,c.name as category_name,sc.name as sub_category  from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id left join alluser as au on p.user_id=au.id where p.company_id='$companyid' and c.id='$category' order by p.product_name asc")->result();
+        $product = $this->db->query("select p.*,u.name  as unit_name,au.fullname,c.name as category_name,sc.name as sub_category  from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id left join alluser as au on p.user_id=au.id where c.id='$category' order by p.product_name asc")->result();
         }
 
         else if($sub_category==-1&&$category==-1){
-        $product = $this->db->query("select p.*,u.name  as unit_name,au.fullname,c.name as category_name,sc.name as sub_category  from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id left join alluser as au on p.user_id=au.id where p.company_id='$companyid' order by p.product_name asc")->result();
+        $product = $this->db->query("select p.*,u.name  as unit_name,au.fullname,c.name as category_name,sc.name as sub_category  from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id left join alluser as au on p.user_id=au.id order by p.product_name asc")->result();
         }
         
         else if($sub_category!=-1&&$category!=-1){
-        $product = $this->db->query("select p.*,u.name  as unit_name,au.fullname,c.name as category_name,sc.name as sub_category  from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id left join alluser as au on p.user_id=au.id where p.company_id='$companyid' and sc.id='$sub_category' and c.id='$category' order by p.product_name asc")->result();
+        $product = $this->db->query("select p.*,u.name  as unit_name,au.fullname,c.name as category_name,sc.name as sub_category  from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id left join alluser as au on p.user_id=au.id where sc.id='$sub_category' and c.id='$category' order by p.product_name asc")->result();
         }
         else
             $product = array();
@@ -100,12 +98,12 @@ class Product extends CI_Controller {
     }
 
     function addproduct_form() {
-        $company_id = $this->session->userdata('company_id');
+        
         $data['activemenu'] = 'master';
         $data['activesubmenu'] = 'products';
         $data['page_title'] = 'Add new product';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $this->load->view('product_derectory/addnewproducts', $data);
         else:
             $this->load->view('login', $data);
@@ -117,37 +115,45 @@ class Product extends CI_Controller {
         $data['activesubmenu'] = 'products';
         $data['page_title'] = 'Add new product';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $p_price = $this->input->post('purchase_price');
             $s_price = $this->input->post('sale_price');
             $quantity =$this->input->post('quantity');
-
+            $randomkey = time();
             $data = array(
                 'product_name' => $this->input->post('product_name'),
                 'purchase_price' => $p_price,
                 'sale_price' => $s_price,
                 'total_quantity' => $quantity,
                 'available_quantity' => $quantity,
-                'date' => date("Y-m-d H:i:s"),
                 'class_id' => $this->input->post('class_id'),
                 'unit_id' => $this->input->post('unit_id'),
                 'warning_quantity' => $this->input->post('warning_quantity'),
-                'company_id' => $this->session->userdata('company_id'),
                 'user_id' => $this->session->userdata('user_id'),
                 'status' => '1'
             );
             savelog("New product added", "New product added; Product name:" . $this->input->post('productname'));
+
+            $datalistq = array(
+                'invoiceid' => $randomkey,
+                'total_purchase' =>$p_price*$quantity,
+                'date'=>date('Y-m-d'),
+                'payment'=>0,
+                'supplier_id' => 3,
+                'user_id' => $this->session->userdata('user_id'),
+            );   
+            $this->db->insert('purchase_summary', $datalistq);   
+
             $this->db->insert('products', $data);
             $product_id = $this->db->insert_id();
             $datalist = array(
-                'invoiceid' => time(),
+                'invoiceid' => $randomkey,
                 'product_id' => $product_id,
                 'supplier_id'=> 3,
                 'buyprice'=> $p_price,
                 'quantity'=>$quantity,
                 'a_quantity'=>$quantity,
-                'date' => date("Y-m-d H:i:s"),
-                'company_id' => $this->session->userdata('company_id')
+                'date' => date("Y-m-d H:i:s")
             );   
             $this->db->insert('purchase', $datalist);
 
@@ -181,11 +187,10 @@ class Product extends CI_Controller {
             $data['pdata'] = $this->db->query("select p.* from products as p where p.id = '$id'")->row();
             //dataview($data['pdata']);
 
-            $data['company_id']=$this->session->userdata('company_id');
             $data['page_title'] = 'Products';
             $data['baseurl'] = $this->config->item('base_url');
             
-            $data['getsubcategory'] = $this->db->get_where('sub_category', array('company_id' => $data['company_id'],'category_id'=>$data['pdata']->category_id))->result();
+            $data['getsubcategory'] = $this->db->get_where('sub_category', array('category_id'=>$data['pdata']->category_id))->result();
 
             $this->load->view('product_derectory/editproduct', $data);
         endif;
@@ -197,7 +202,7 @@ class Product extends CI_Controller {
         $data['page_title'] = 'Add new product';
         $data['baseurl'] = $this->config->item('base_url');
 
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $id = $this->input->post('id');
             // $imagename = $this->input->post('preimage');
 
@@ -260,10 +265,8 @@ class Product extends CI_Controller {
                 'purchase_price' => $purchase_price,
                 'sale_price' => $sale_price,
                 //'image' => $imagename,
-                'date' => date("Y-m-d H:i:s"),
                 'decimale_multiplier' => $this->input->post('decimale_multiplier'),
                 'warning_quantity' => $this->input->post('warning_quantity'),
-                'company_id' => $this->session->userdata('company_id'),
                 'user_id' => $this->session->userdata('user_id'),
                 'status' => '1',
                 'total_quantity' => $total_quantity,
@@ -296,12 +299,11 @@ class Product extends CI_Controller {
     }
 
     function summary(){
-        $company_id = $this->session->userdata('company_id');
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'productsummary';
         $data['page_title'] = 'Product Summary';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $sdate = date("Y-m-d") . ' 00:00:00';
             $edate = date("Y-m-d") . ' 23:59:59';
             $data['sdate'] = date("Y-m-d");
@@ -440,119 +442,13 @@ class Product extends CI_Controller {
         else if($product->status==1 && $product->warning_quantity>=$product->available_quantity)
              $this->session->set_userdata('notification',$this->session->userdata('notification')+1);
     }
-
-    //---------------------------------------------  category
-    function category() {
-        $data['activemenu'] = 'master';
-        $data['activesubmenu'] = 'category';
-        $data['page_title'] = 'Master Setting';
-        $data['baseurl'] = $this->config->item('base_url');
-        
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
-            $data['categorydata'] = $this->db->query("select c.*,u.fullname from category as c left join alluser as u on c.user_id=u.id where c.company_id='".$this->session->userdata('company_id')."'")->result();
-            $this->load->view('product_derectory/category', $data);
-
-        else:
-            $this->load->view('login', $data);
-        endif;
-    }
-
-    function addcategory() {
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
-            $data = array(
-                'name' => $this->input->post('name'),
-                'description' => $this->input->post('description'),
-                'company_id' => $this->session->userdata('company_id'),
-                'user_id' => $this->session->userdata('user_id'),
-                'date' => date("Y-m-d H:i:s")
-            );
-            $this->db->insert('category', $data);
-            $this->session->set_userdata('success', 'Category added successfully');
-            savelog('New category added', 'Category ' . $this->input->post('name') . ' added successfully');
-            redirect('product/category');
-        else:
-            $this->load->view('login', $data);
-        endif;
-    }
-
-    function updatecategory() {
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
-            $id = $this->input->post('cat_id');
-            $data = array(
-                'name' => $this->input->post('name'),
-                'description' => $this->input->post('description'),
-                'user_id' => $this->session->userdata('user_id')
-            );
-            $this->db->where('id', $id);
-            $this->db->update('category', $data);
-            $this->session->set_userdata('success', 'Category updated successfully');
-            redirect('product/category');
-        else:
-            $this->load->view('login', $data);
-        endif;
-    }
-    //--------------------------------------------  sub category
-    function subcategory() {
-        $data['activemenu'] = 'master';
-        $data['activesubmenu'] = 'subcategory';
-        $data['page_title'] = 'Master Setting';
-        $data['baseurl'] = $this->config->item('base_url');
-
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
-            $data['categorydata'] = $this->db->query("select c.*, l.name as category_name,u.fullname from sub_category as c left join category as l on c.category_id=l.id left join alluser as u on c.user_id=u.id where c.company_id='".$this->session->userdata('company_id')."' order by id asc")->result();
-            $this->load->view('product_derectory/subcategory', $data);
-
-        else:
-            $this->load->view('login', $data);
-        endif;
-    }
-
-    function addsubcategory() {
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
-            $data = array(
-                'name' => $this->input->post('name'),
-                'category_id' => $this->input->post('category_id'),
-                'company_id' => $this->session->userdata('company_id'),
-                'user_id' => $this->session->userdata('user_id'),
-                'date' => date("Y-m-d H:i:s")
-            );
-            $this->db->insert('sub_category', $data);
-            $this->session->set_userdata('success', 'Sub Category added successfully');
-            savelog('New sub category added', 'Sub Category ' . $this->input->post('name') . ' added successfully');
-            redirect('product/subcategory');
-        else:
-            $this->load->view('login', $data);
-        endif;
-    }
-
-    function updatesubcategory() {
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
-            $id = $this->input->post('cat_id');
-            $data = array(
-                'name' => $this->input->post('name'),
-                'category_id' => $this->input->post('category_id'),
-                'user_id' => $this->session->userdata('user_id')
-
-            );
-            $this->db->where('id', $id);
-            $this->db->update('sub_category', $data);
-            $this->session->set_userdata('success', 'Sub Category updated successfully');
-            redirect('product/subcategory');
-        else:
-            $this->load->view('login', $data);
-        endif;
-    }
+ 
+  
     //--------------------------------------------  ajax
-    function getSubCategory(){
-
-        $classId = $this->input->post('classId');
-        $data = $this->db->query("select * from sections where class_id = ".$classId." and company_id='".$this->session->userdata('company_id')."'")->result();
-        echo json_encode($data);
-    }
 
     function productUplodCsv(){
 
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != '' && $_FILES['upload_data_file']  )
+        if ($this->session->userdata('loggedin') == 'yes' && $_FILES['upload_data_file']  )
         {
 
             $file_name = $_FILES['upload_data_file']['name'];
@@ -596,7 +492,6 @@ class Product extends CI_Controller {
                 'unit' => $my_data[$i][4],
                 'opening_quantity' => $my_data[$i][7],
                 'warning_quantity' => $my_data[$i][8],
-                'company_id' => $this->session->userdata('company_id'),
                 'user_id' => $this->session->userdata('user_id'),
                 'status' => '1',
                 'decimale_multiplier' =>10 

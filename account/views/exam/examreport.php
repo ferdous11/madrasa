@@ -2,7 +2,7 @@
 <?php include __DIR__ .'/../menu.php'; ?>
 <style>
     .tscroll {
-        width: 650px;
+        width: 680px;
         overflow-x: scroll;
         margin-bottom: 10px;
         border: solid black 1px;
@@ -50,6 +50,7 @@
                 </header>
                 <div class="panel-body">
                     <div id="invoicediv" class="form tscroll">
+                        <form method="post" action="<?php echo site_url('exam/admit'); ?>" enctype="multipart/form-data">
                         <table class="display table table-bordered table-striped dataTable" id="suppliertableid">
 
                             <thead id="thead">
@@ -61,6 +62,7 @@
                                     <?php endforeach;?>
                                     <th>মোট</th>
                                     <th>বর্তমান রোল</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody id="body">
@@ -72,12 +74,20 @@
                                             echo "<td style='text-align:center'>".$m->mark."</td>";
                                         } 
                                         echo "<td style='text-align:center'>".$ta."</td>";
-                                        echo "<td style='text-align:center'>".$newRoll[$student->id]."</td></tr>"; 
-                                    endforeach;?>
-                             
+                                        echo "<td style='text-align:center'>".$newRoll[$student->id]."</td><td>"; 
+                                        echo '<input type="checkbox" name="'.$student->id.'"value="'.$student->id.'">';
+
+                                        echo '<input type="hidden" name="student_id[]" value="'.$student->id.'">';
+                                        echo '<input type="hidden" name="class_id[]" value="'.$student->class_id.'">';
+                                        echo '<input type="hidden" name="roll[]" value="'.$student->roll.'">';
+                                        echo '<input type="hidden" name="new_roll[]" value="'.$newRoll[$student->id].'"></td></tr>';
+                                        
+                                    endforeach;?> 
                             </tbody>
                         </table>
-                        <span style="float: right;margin-left: 20px"><button class="btn btn-primary" value="Print" tabindex="2" onclick="Clickheretoprint()">Print Invoice</button>
+                        <span style="float: right;margin-left: 20px"><button class="btn btn-primary" value="Print" tabindex="2" onclick="Clickheretoprint()">প্রিন্ট করুন</button>
+                        <button class="btn btn-success" type="submit">পরবর্তি ক্লাসে যুক্ত করুন</button>
+                        </form>
                     </div>
                 </div>
             </section>

@@ -46,7 +46,7 @@
                                         <select name="class_id" id="class" class="form-control selectpicker" data-live-search="true" required="">
                                        
                                             <?php
-                                            $getcategory = $this->db->get_where('classes', array('company_id' => $this->session->userdata('company_id')))->result();
+                                            $getcategory = $this->db->get('classes')->result();
                                             if (sizeof($getcategory) > 0):
                                                 foreach ($getcategory as $cate):
                                                     ?>
@@ -80,7 +80,7 @@
                                     <div class="col-lg-2">
                                         <select name="unit_id" id="unit" class="form-control">
                                             <?php
-                                            $getunit = $this->db->get_where('product_unit', array('company_id' => $this->session->userdata('company_id')))->result();
+                                            $getunit = $this->db->get('product_unit')->result();
                                             if (sizeof($getunit) > 0):
                                                 foreach ($getunit as $cate):
                                                     ?>

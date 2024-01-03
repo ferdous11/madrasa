@@ -94,6 +94,7 @@
                                     </div>
                                     <div class="col-lg-2 col-sm-2">
                                         <input style="color: #000;font-weight: bold"  class="form-control" type="text" name="unit" id="unit" readonly="">
+                                        <input type="hidden" name="unit_id" id="unit_id">
                                     </div>
                                 </div> 
 
@@ -285,12 +286,12 @@
 
                                         <select tabindex="8" name="suppliers" id="suppliers" class="form-control selectpicker" data-live-search="true" required=""> 
                                         <?php 
-                                        $companyid = $this->session->userdata('company_id');
+                                
                                         ?>
                                                      <option value="">Select One</option>
                                                     <?php
                                                     
-                                                    $supplier = $this->db->query("select a.*,d.name as district_name from accountledger as a left join districts as d on a.district=d.id where a.accountgroupid = 5 AND a.company_id = '$companyid' and a.status<>0 order by a.ledgername asc")->result();
+                                                    $supplier = $this->db->query("select a.*,d.name as district_name from accountledger as a left join districts as d on a.district=d.id where a.accountgroupid = 5 and a.status<>0 order by a.ledgername asc")->result();
 
                                                     if (sizeof($supplier) > 0 ):
                                                         foreach ($supplier as $suppr):
@@ -385,6 +386,7 @@
             success: function (response) {
                 var jsonObject = jQuery.parseJSON(response);
                 $("#unit").val(jsonObject.unit);
+                $("#unit_id").val(jsonObject.unit_id);
                 $("#sales_price").val(jsonObject.sale_price);
                 $("#buyprice").val(parseFloat(jsonObject.purchase_price).toFixed(2))
             }

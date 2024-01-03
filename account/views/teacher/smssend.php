@@ -28,7 +28,7 @@
                     <div class="input-group">
                         <textarea style="text-align: left;" name="smsbody" id="smsbody" cols="30" rows="10"></textarea>
                         <span id="countchr"></span>
-                        <select class="selectpicker form-control" id="class_id" placeholder="Select Class" tabindex="1"   data-live-search="true" name="class_id" onchange="getsection(this.value)">
+                        <select class="selectpicker form-control" id="class_id" placeholder="Select Class" tabindex="1"   data-live-search="true" name="class_id">
                                 <option></option>
                                 <?php foreach ($classes as $class):?>
                                 <option <?php echo ($class->id==$class_id)?"selected":"";?> value="<?php echo $class->id?>"><?php echo $class->class_name?></option>
@@ -98,36 +98,6 @@
          $("#counter").text('রোলঃ '+roll);
    }
 
-   function getsection(id){
-        var postdata = 'id=' + id;
-        $.ajax({
-            type: 'POST',
-            url: '<?php echo site_url("teacher/getsection"); ?>',
-            data: postdata,
-            success: function (response) {
-                var jsonObject = jQuery.parseJSON(response);
-                $("#student_section").find('option').remove().end();
-                $("#student_section").append($('<option>', {
-                        value: '' ,
-                        text: 'Select Section'
-                }));
-                if(Object.keys(jsonObject).length>0){
-                    $("#sectionflag").show();
-                    $.each( jsonObject, function( r,v) {
-                        
-                        $("#student_section").append($('<option>', {
-                            value: v.id,
-                            text: v.section_name
-                        }));
-                    });
-                    $('.selectpicker').selectpicker('refresh');
-                }
-                else{$("#sectionflag").hide();}
-            }
-        });
-      }
-    $("#smsbody").keyup(function(){
-    $("#countchr").text($(this).val().length);
-    });
+  
 </script>
 

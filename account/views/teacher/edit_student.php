@@ -3,7 +3,7 @@
 <section id="main-content">
     <section class="wrapper">
         <div style="text-align: center;" class="row col-sm-12">
-        <a style="float: left;" class="btn btn-danger" href="<?=$baseurl?>teacher/students_list/<?=$student->class_id;?>/<?=$student->section_id;?>/#tr-<?=$student->roll;?>"><i class="fa fa-arrow-left"></i> পূর্ববর্তী পেজে ফিরে যান </a>  
+        <a style="float: left;" class="btn btn-danger" href="<?=$baseurl?>teacher/students_list/<?=$student->class_id;?>/#tr-<?=$student->roll;?>"><i class="fa fa-arrow-left"></i> পূর্ববর্তী পেজে ফিরে যান </a>  
             <img src="<?php echo $baseurl."assets/image/students/".$student->image;?>" alt="">
             <h1 class="col-md-5 col-sm-11 col-md-push-3"> তালেবে এলেম তথ্য হালনাগাত </h1>
         </div>
@@ -12,7 +12,7 @@
                 <div class="col-sm-10 col-md-7 col-md-push-3 col-sm-push-1">
                     <div class="form-group">
                         <label for="class_id">শ্রেণী</label>
-                        <select class="form-control selectpicker" id="class_id" placeholder="Select Class" tabindex="1"   data-live-search="true" name="class_id" onchange="getsection(this.value)">
+                        <select class="form-control selectpicker" id="class_id" placeholder="Select Class" tabindex="1"   data-live-search="true" name="class_id">
                             <option></option>
                             <?php foreach ($classes as $class):?>
                             <option <?php echo ($class->id==$student->class_id)?"selected":"";?> value="<?php echo $class->id?>"><?php echo $class->class_name?></option>
@@ -22,17 +22,7 @@
                         <label id="rollHelp" class="form-text text-muted" style="color: red;"><?php echo form_error('class_id'); ?></label>
                     </div> 
                 </div>
-                <div class="col-sm-10 col-md-7 col-md-push-3 col-sm-push-1">
-                    <div class="form-group" <?php echo $student->section_id > 0 ?'':'hidden=""';?> id="sectionflag">
-                        <label for="student_section">উপ-শ্রেণী</label>
-                        <select class="form-control selectpicker" id="student_section" placeholder="Select Section" tabindex="2"   data-live-search="true" name="section_id" >
-                            <option></option>
-                            <?php foreach ($sections as $section):?>
-                            <option <?php echo ($section->id==$student->section_id)?"selected":"";?> value="<?php echo $section->id?>"><?php echo ($section->section_name);?></option>
-                            <?php endforeach;?>
-                        </select>
-                    </div>   
-                </div>
+               
                 <div class="col-sm-10 col-md-7 col-md-push-3 col-sm-push-1">
                     <div class="form-group" id="sectionflag">
                         <label for="student_name">নাম</label>
@@ -122,7 +112,7 @@
                     <input type="hidden" name="ledgerid" value="<?php echo $student->ledger_id;?>">
                     <div class="container-fluid">
                         <div class="row">
-                        <div class="col-md-2 col-sm-4"><a class="btn btn-danger" href="<?=$baseurl?>teacher/students_list/<?=$student->class_id;?>/<?=$student->section_id;?>/#tr-<?=$student->roll;?>"><i class="fa fa-times"></i> বাতিল করুন </a></div>
+                        <div class="col-md-2 col-sm-4"><a class="btn btn-danger" href="<?=$baseurl?>teacher/students_list/<?=$student->class_id;?>/#tr-<?=$student->roll;?>"><i class="fa fa-times"></i> বাতিল করুন </a></div>
                         <div class="col-md-2 col-sm-4"><button  tabindex="13" value="submit" name="submit" type="submit" id="sbutton" class="btn btn-primary"> হালনাগাত করুন </button></div>
                         </div>
                     </div>
@@ -137,41 +127,5 @@
 <?php include __DIR__ .'/../footer.php'; ?>
 <script type="text/javascript">
       
-      function getsection(id){
-        
-        var postdata = 'id=' + id;
-        // console.log(id);
-        $.ajax({
-            type: 'POST',
-            url: '<?php echo site_url("teacher/getsection"); ?>',
-            data: postdata,
-            success: function (response) {
-                var jsonObject = jQuery.parseJSON(response);
-                // console.log(jsonObject);
-                $("#student_section").find('option').remove().end();
-                
-                $("#student_section").append($('<option>', {
-                        value: '' ,
-                        text: 'Select Section'
-                }));
-               
-                if(Object.keys(jsonObject).length>0){
-                    $("#sectionflag").show();
-                    $.each( jsonObject, function( r,v) {
-                        
-                        $("#student_section").append($('<option>', {
-                            value: v.id,
-                            text: v.section_name
-                        }));
-                    });
-                    $('.selectpicker').selectpicker('refresh');
-                }
-
-                else{
-                    $("#sectionflag").hide();
-                }
-            }
-        });
-      }
 
 </script>

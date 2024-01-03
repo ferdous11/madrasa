@@ -18,7 +18,7 @@
                         ?>
                         <div class="form" id="invoicediv">
                             
-                            <?php echo $company->address;?>
+                            <?php echo $sotre->address;?>
                                    
                             <table style="font-family: adorsholipi;font-size: 18px;font-style: bold" border="0" class="display table">
                                 <colgroup>

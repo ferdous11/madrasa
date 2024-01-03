@@ -28,7 +28,7 @@
                 <div class="col-sm-10 col-md-7 col-md-push-3 col-sm-push-1">
                     <div class="form-group">
                         <label for="class_id">শ্রেণী</label>
-                        <select require class="form-control selectpicker" id="class_id" placeholder="Select Class" tabindex="1"   data-live-search="true" name="class_id" onchange="getsection(this.value)">
+                        <select require class="form-control selectpicker" id="class_id" placeholder="Select Class" tabindex="1"   data-live-search="true" name="class_id" onchange="getmaxroll(this.value)">
                             <option></option>
                             <?php foreach ($classes as $class):?>
                             <option <?php echo ($class->id==$class_id)?"selected":"";?> value="<?php echo $class->id?>"><?php echo $class->class_name?></option>
@@ -36,17 +36,6 @@
                         </select>
                        
                     </div> 
-                </div>
-                <div class="col-sm-10 col-md-7 col-md-push-3 col-sm-push-1">
-                    <div class="form-group" <?php echo $section_id > 0 ?'':'hidden=""';?> id="sectionflag">
-                        <label for="student_section">উপ-শ্রেণী</label>
-                        <select class="form-control selectpicker" id="student_section" placeholder="Select Section" tabindex="2"   data-live-search="true" name="section_id" >
-                            <option></option>
-                            <?php foreach ($sections as $section):?>
-                            <option <?php echo ($section->id==$section_id)?"selected":"";?> value="<?php echo $section->id?>"><?php echo ($section->section_name);?></option>
-                            <?php endforeach;?>
-                        </select>
-                    </div>   
                 </div>
                 <div class="col-sm-10 col-md-7 col-md-push-3 col-sm-push-1">
                     <div class="form-group" id="sectionflag">
@@ -128,7 +117,8 @@
                 <div class="row col-sm-11 col-md-8 col-md-push-4"> 
                 <div class="col-md-2">
                 <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
-                <input style="height: 50px;font-size: 25px;" tabindex="4" name="submit" type="submit" class="form-control btn btn-sm btn-primary" value="জমা দিন" id="sbutton"/>   
+                
+                <input style="height: 50px;font-size: 20px;" tabindex="4" name="submit" type="submit" class="form-control btn btn-sm btn-primary" value="জমা দিন" id="sbutton"/>   
                  
                     <!-- <button tabindex="13" value="submit" name="submit" type="submit" id="sbutton" class="btn btn-primary">জমা দিন</button> -->
                 </div>
@@ -142,12 +132,11 @@
 </section>
 <?php include __DIR__ .'/../footer.php'; ?>
 <script type="text/javascript">
-      
-    function getsection(id){
+    function getmaxroll(id){
         var postdata = 'id=' + id + '&& <?php echo $this->security->get_csrf_token_name(); ?>=' + '<?php echo $this->security->get_csrf_hash(); ?>';
         $.ajax({
             type: 'POST',
-            url: '<?php echo site_url("teacher/getmaxroll"); ?>',
+            url: '<?php echo site_url("teacher/getmaxroll");?>',
             data: postdata,
             success: function (response) {
                 var jsonObject = jQuery.parseJSON(response);

@@ -26,6 +26,17 @@
                 <div class="row">
                 <div class="col-md-6 col-md-push-3">
                     <div class="input-group">
+                        <label for="year" class="col-md-1">সাল</label>
+                    <select class="selectpicker form-control" id="year" placeholder="Select Class" tabindex="1"   data-live-search="true" name="year">
+                        <option></option>
+                        <?php for($i=2023;$i<=date('Y');$i++):?>
+                        <option <?php echo ($year==$i)?"selected":"";?> value="<?php echo $i?>"><?php echo $i?></option>
+
+                        <?php endfor;?>
+                    </select>
+                    <label id="yearHelp" class="form-text text-muted" style="color: red;"><?php echo form_error('year'); ?></label>
+                    </div>
+                    <div class="input-group">
                         <label for="exam_id" class="col-md-1">পরীক্ষা</label>
                     <select class="selectpicker form-control" id="exam_id" placeholder="Select Class" tabindex="1"   data-live-search="true" name="exam_id">
                         <option></option>
