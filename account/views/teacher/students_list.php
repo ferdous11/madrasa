@@ -116,9 +116,9 @@
                                     <a href="tel:<?php echo $student->guardian_mobile;?>"><label class="btn btn-sm btn-success"><i class="fa fa-phone" aria-hidden="true"></i></label></a>
 
                                     <label id="lbl-<?php echo $student->id;?>"  onclick="updateinfo(<?php echo $student->id.','.$student->ledger_id;?>)" class="btn btn-sm btn-danger">Update  </label>
-                                    <?php if($this->session->userdata('role')=='admin'):?>
+                                    <?php // if($this->session->userdata('role')=='admin'):?>
                                     <a href="<?php echo $baseurl.'teacher/editstudent/'.$student->id;?>"><label class="btn btn-sm btn-success"><i class="fa fa-edit" aria-hidden="true"></i></label></a>
-                                    <?php endif;?>
+                                    <?php // endif;?>
                                 
                                 </div>
                                 <div class="form-group">

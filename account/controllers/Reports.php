@@ -20,7 +20,7 @@ class Reports extends CI_Controller {
 
     function salesreturn() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $data['activemenu'] = 'reports';
             $data['activesubmenu'] = 'sellreturn';
             $data['page_title'] = 'Sales return history';
@@ -29,7 +29,6 @@ class Reports extends CI_Controller {
             $data['edate'] = date('Y-m-d');
             $sdate = date('Y-m-d') . ' 00:00:00';
             $edate = date('Y-m-d') . ' 23:59:59';
-            $comid = $this->session->userdata('company_id');
             $data['selldata'] = $this->db->query("select p.*,l.ledgername,l.address,l.mobile,l.father_name,d.name as district_name,u.fullname from sell_return_summary as p left join accountledger as l on p.customer_id=l.id left join districts as d on l.district=d.id left join alluser as u on p.user_id=u.id where p.date between '$sdate' and '$edate'")->result();
             $this->load->view('report_derectory/sellreturn_log', $data);
         else:
@@ -39,7 +38,7 @@ class Reports extends CI_Controller {
 
     function sellreturnhistory() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $data['activemenu'] = 'reports';
             $data['activesubmenu'] = 'sellreturn';
             $data['page_title'] = 'Sales return history';
@@ -48,7 +47,6 @@ class Reports extends CI_Controller {
             $data['edate'] = $this->input->post('edate');
             $sdate = $this->input->post('sdate') . ' 00:00:00';
             $edate = $this->input->post('edate') . ' 23:59:59';
-            $comid = $this->session->userdata('company_id');
             $data['selldata'] = $this->db->query("select p.*,l.ledgername,l.address,l.father_name,l.mobile,d.name as district_name,u.fullname from sell_return_summary as p left join accountledger as l on p.customer_id=l.id left join districts as d on l.district=d.id left join alluser as u on p.user_id=u.id where p.date between '$sdate' and '$edate'")->result();
             $this->load->view('report_derectory/sellreturn_log', $data);
         else:
@@ -58,15 +56,13 @@ class Reports extends CI_Controller {
 
     function showsellreturn($invoiceid){
         $data['baseurl'] = $this->config->item('base_url');
-      if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+      if ($this->session->userdata('loggedin') == 'yes' ):
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'sellreturn';
-        $company_id = $this->session->userdata('company_id');
-        $data['company'] = $this->db->query("select * from company where company_id = '$company_id'")->row();
         $data['baseurl'] = $this->config->item('base_url');
-        $data['invoicedata'] = $this->db->query("select d.*,p.product_name ,u.name as unit_name from sell_return as d left join products as p on d.product_id=p.id left join product_unit as u on d.unit=u.id where d.invoice_id = '$invoiceid' AND d.company_id = '$company_id'")->result();
+        $data['invoicedata'] = $this->db->query("select d.*,p.product_name ,u.name as unit_name from sell_return as d left join products as p on d.product_id=p.id left join product_unit as u on d.unit=u.id where d.invoice_id = '$invoiceid'")->result();
 
-        $data['voicedata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.father_name,l.mobile,l.address,di.name as district_name,u.fullname as user_name from sell_return_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as u on d.user_id=u.id where d.invoiceid = '$invoiceid' AND d.company_id = '$company_id'")->row();
+        $data['voicedata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.father_name,l.mobile,l.address,di.name as district_name,u.fullname as user_name from sell_return_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as u on d.user_id=u.id where d.invoiceid = '$invoiceid'")->row();
 
         // Current Due Calculation
         $ledgerid= $data['voicedata']->customer_id;
@@ -98,18 +94,15 @@ class Reports extends CI_Controller {
         if ($this->session->userdata('loggedin') == 'yes' && ($this->session->userdata('role') == 'admin'||($data['sellsummary']->date > $datef." 00:00:00" && $data['sellsummary']->date < $datef." 23:59:59" ))):
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'sellreturn';
-        $company_id = $this->session->userdata('company_id');
         $data['baseurl'] = $this->config->item('base_url');
         $data['randsellid']=$invoiceid;
-        $data['category_id']=1;
-        $data['sub_category']=1;
+   
         
         $data['customer'] = $data['sellsummary']->customer_id;
-        $data['productlist']=$this->db->query("select id,product_name,category_id,sub_category from products where company_id ='".$company_id."' order by product_name asc")->result();
-        $data['allcategory']=$this->db->query("select * from category")->result();
-        $data['subCategory']=$this->db->query("select * from sub_category")->result();
-        $data['selldata'] = $this->db->query("select s.*,p.product_name as name,p.category_id,p.sub_category,p.unit as unit_id ,u.name as unit_name from sell_return as s left join products as p on s.product_id=p.id left join product_unit as u on p.unit=u.id where s.invoice_id='$invoiceid' order by id desc")->result();
-        //$data['getcustomer'] = $this->db->query("select l.id,l.ledgername,l.address,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where l.accountgroupid = '16' and l.company_id = '$company_id' order by l.ledgername")->result();
+        $data['productlist']=$this->db->query("select id,product_name from products order by product_name asc")->result();
+        
+        $data['selldata'] = $this->db->query("select s.*,p.product_name as name,p.unit_id ,u.name as unit_name from sell_return as s left join products as p on s.product_id=p.id left join product_unit as u on p.unit_id=u.id where s.invoice_id='$invoiceid' order by id desc")->result();
+        //$data['getcustomer'] = $this->db->query("select l.id,l.ledgername,l.address,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where l.accountgroupid = '16' order by l.ledgername")->result();
         $data['supplierinfo'] = $this->db->query("select l.id,l.ledgername,l.address,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where l.id = '".$data['customer']."' ")->row();
             $this->load->view('report_derectory/editsellreturn',$data);
         else:
@@ -134,10 +127,7 @@ class Reports extends CI_Controller {
         
         
         $dailysellid = $this->input->post("dailysellid");
-        $category_id = $this->input->post("category_id");
-
-        $pcategory_id = $this->input->post("pcategory_id");
-       
+   
     
         $product = $this->db->query("select * from products where id='$product_id'")->row();
         $pproduct = $this->db->query("select * from products where id='$pproduct_id'")->row();
@@ -277,7 +267,7 @@ class Reports extends CI_Controller {
                     'debit' => 0,
                     'credit' => $discount,
                     'description' => "Sr-". sprintf("%06d", $dailys->id),
-                    'company_id' => $this->session->userdata('company_id')
+              
                 );
                 $this->db->insert('ledgerposting', $datalist_payment1);
 
@@ -290,7 +280,7 @@ class Reports extends CI_Controller {
                     'debit' => $discount,
                     'credit' => 0,
                     'description' => "Sr-". sprintf("%06d", $dailys->id),
-                    'company_id' => $this->session->userdata('company_id')
+                   
                 );
                 $this->db->insert('ledgerposting', $datalist_payment2);
             }
@@ -308,7 +298,7 @@ class Reports extends CI_Controller {
                     'date' => $date,
                     'amount' => $payment,
                     'description' => "Sr-". sprintf("%06d", $dailys->id),
-                    'company_id' => $this->session->userdata('company_id'),
+                   
                     'user_id' => $this->session->userdata('user_id')
                 );
                 $this->db->insert('payments', $datalist);
@@ -324,8 +314,7 @@ class Reports extends CI_Controller {
                     'vouchertype' => 'Payment voucher',
                     'debit' => '0',
                     'credit' => $payment,
-                    'description' => "Sr-". sprintf("%06d", $dailys->id),
-                    'company_id' => $this->session->userdata('company_id')
+                    'description' => "Sr-". sprintf("%06d", $dailys->id)
                 );
                 $this->db->insert('ledgerposting', $datalist_payment1);
 
@@ -337,8 +326,7 @@ class Reports extends CI_Controller {
                     'vouchertype' => 'Payment voucher',
                     'credit' => '0',
                     'debit' => $payment,
-                    'description' => "Sr-". sprintf("%06d", $dailys->id),
-                    'company_id' => $this->session->userdata('company_id')
+                    'description' => "Sr-". sprintf("%06d", $dailys->id)
                 );
                 $this->db->insert('ledgerposting', $datalist_payment2);
             }
@@ -359,7 +347,7 @@ class Reports extends CI_Controller {
         $datef= date('Y-m-d');
         if ($this->session->userdata('loggedin') == 'yes' && ($this->session->userdata('role') == 'admin'||($dailys->date > $datef." 00:00:00" && $dailys->date < $datef." 23:59:59" ))):
 
-        $dailysell =$this->db->query("select s.*,p.category_id,p.available_quantity,p.warning_quantity from sell_return as s left join products as p on s.product_id=p.id where s.invoice_id='$voucherid'")->result();
+        $dailysell =$this->db->query("select s.*,p.available_quantity,p.warning_quantity from sell_return as s left join products as p on s.product_id=p.id where s.invoice_id='$voucherid'")->result();
 
         foreach ($dailysell as $key ) {
             $tarray = json_decode($key->devcomment);
@@ -402,7 +390,7 @@ class Reports extends CI_Controller {
 
     public function deletesellse($invoiceid){
         $data['baseurl'] = $this->config->item('base_url');
-        $dailysell =$this->db->query("select s.*,p.category_id,p.available_quantity,p.warning_quantity from sell_return as s left join products as p on s.product_id=p.id where s.id='$invoiceid'")->row();
+        $dailysell =$this->db->query("select s.*,p.available_quantity,p.warning_quantity from sell_return as s left join products as p on s.product_id=p.id where s.id='$invoiceid'")->row();
 
         $tarray = json_decode($dailysell->devcomment);
         if(!empty($tarray)){
@@ -447,7 +435,7 @@ class Reports extends CI_Controller {
     
     function purchasereturn() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $data['activemenu'] = 'reports';
             $data['activesubmenu'] = 'purchasereturn';
             $data['page_title'] = 'Purchase return history';
@@ -456,7 +444,6 @@ class Reports extends CI_Controller {
             $data['edate'] = date('Y-m-d');
             $sdate = date('Y-m-d') . ' 00:00:00';
             $edate = date('Y-m-d') . ' 23:59:59';
-            $comid = $this->session->userdata('company_id');
             $data['selldata'] = $this->db->query("select p.*,l.ledgername,l.address,l.father_name,l.mobile,d.name as district_name,u.fullname from purchase_return_summary as p left join accountledger as l on p.customer_id=l.id left join districts as d on l.district=d.id left join alluser as u on p.user_id=u.id where p.date between '$sdate' and '$edate'")->result();
             $this->load->view('report_derectory/purchasereturn_log', $data);
         else:
@@ -466,7 +453,7 @@ class Reports extends CI_Controller {
 
     function purchasereturnhistory() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $data['activemenu'] = 'reports';
             $data['activesubmenu'] = 'purchasereturn';
             $data['page_title'] = 'Purchase return history';
@@ -475,7 +462,6 @@ class Reports extends CI_Controller {
             $data['edate'] = $this->input->post('edate');
             $sdate = $this->input->post('sdate') . ' 00:00:00';
             $edate = $this->input->post('edate') . ' 23:59:59';
-            $comid = $this->session->userdata('company_id');
             $data['selldata'] = $this->db->query("select p.*,l.ledgername,l.address,l.father_name,l.mobile,d.name as district_name,u.fullname from purchase_return_summary as p left join accountledger as l on p.customer_id=l.id left join districts as d on l.district=d.id left join alluser as u on p.user_id=u.id where p.date between '$sdate' and '$edate'")->result();
             $this->load->view('report_derectory/purchasereturn_log', $data);
         else:
@@ -485,15 +471,14 @@ class Reports extends CI_Controller {
 
     function showpurchasereturn($invoiceid){
         $data['baseurl'] = $this->config->item('base_url');
-      if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+      if ($this->session->userdata('loggedin') == 'yes' ):
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'purchasereturn';
-        $company_id = $this->session->userdata('company_id');
-        $data['company'] = $this->db->query("select * from company where company_id = '$company_id'")->row();
+  
         $data['baseurl'] = $this->config->item('base_url');
-        $data['invoicedata'] = $this->db->query("select d.*,p.product_name ,u.name as unit_name from purchase_return as d left join products as p on d.product_id=p.id left join product_unit as u on d.unit=u.id where d.invoice_id = '$invoiceid' AND d.company_id = '$company_id'")->result();
+        $data['invoicedata'] = $this->db->query("select d.*,p.product_name ,u.name as unit_name from purchase_return as d left join products as p on d.product_id=p.id left join product_unit as u on d.unit=u.id where d.invoice_id = '$invoiceid'")->result();
 
-        $data['voicedata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.mobile,l.address,l.father_name,di.name as district_name,u.fullname as user_name from purchase_return_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as u on d.user_id=u.id where d.invoiceid = '$invoiceid' AND d.company_id = '$company_id'")->row();
+        $data['voicedata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.mobile,l.address,l.father_name,di.name as district_name,u.fullname as user_name from purchase_return_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as u on d.user_id=u.id where d.invoiceid = '$invoiceid'")->row();
 
         $data['totalPrice'] =$data['voicedata']->total_purchase;
         $data['discount'] =$data['voicedata']->discount;
@@ -515,18 +500,14 @@ class Reports extends CI_Controller {
         if ($this->session->userdata('loggedin') == 'yes' && ($this->session->userdata('role') == 'admin'||($data['sellsummary']->date > $datef." 00:00:00" && $data['sellsummary']->date < $datef." 23:59:59" ))):
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'purchasereturn';
-        $company_id = $this->session->userdata('company_id');
         $data['baseurl'] = $this->config->item('base_url');
         $data['randsellid']=$invoiceid;
-        $data['category_id']=1;
-        $data['sub_category']=1;
-        
+      
         $data['customer'] = $data['sellsummary']->customer_id;
-        $data['productlist']=$this->db->query("select id,product_name,category_id,sub_category from products where company_id ='".$company_id."' order by product_name asc")->result();
-        $data['allcategory']=$this->db->query("select * from category")->result();
-        $data['subCategory']=$this->db->query("select * from sub_category")->result();
-        $data['selldata'] = $this->db->query("select s.*,p.product_name as name,p.category_id,p.sub_category,p.unit as unit_id ,u.name as unit_name from purchase_return as s left join products as p on s.product_id=p.id left join product_unit as u on p.unit=u.id where s.invoice_id='$invoiceid' order by id desc")->result();
-        // $data['getcustomer'] = $this->db->query("select l.id,l.ledgername,l.address,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where l.accountgroupid = '15' and l.company_id = '$company_id' order by l.ledgername")->result();
+        $data['productlist']=$this->db->query("select id,product_name from products order by product_name asc")->result();
+       
+        $data['selldata'] = $this->db->query("select s.*,p.product_name as name,p.unit_id ,u.name as unit_name from purchase_return as s left join products as p on s.product_id=p.id left join product_unit as u on p.unit_id=u.id where s.invoice_id='$invoiceid' order by id desc")->result();
+        // $data['getcustomer'] = $this->db->query("select l.id,l.ledgername,l.address,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where l.accountgroupid = '15' order by l.ledgername")->result();
         $data['supplierinfo'] = $this->db->query("select l.id,l.ledgername,l.address,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where l.id = '".$data['customer']."' ")->row();
             $this->load->view('report_derectory/editpurchasereturn',$data);
         else:
@@ -555,8 +536,6 @@ class Reports extends CI_Controller {
 
         $dailysellid = $this->input->post("dailysellid");
 
-        $category_id = $this->input->post("category_id");
-        $pcategory_id = $this->input->post("category_id");
         
     
         $product = $this->db->query("select * from products where id='$product_id'")->row();
@@ -577,7 +556,7 @@ class Reports extends CI_Controller {
 
         
             $this->db->query("update products set available_quantity = available_quantity-'$quantity',total_quantity=total_quantity-'$pquantity' where id = '$product_id'");
-            if($category_id!=6){
+           
                 $purchase = $this->db->query("select id,a_quantity,buyprice from purchase where product_id='$product_id' and a_quantity>0 and supplier_id='$psupplier_id' order by id asc")->result();
                 $devcomment = array();
                 //$profit= 0;
@@ -599,18 +578,6 @@ class Reports extends CI_Controller {
                         $tquantity -= $pu->a_quantity;
                     }
                 }
-                // if($tquantity!=0){
-                //     $profit+=(($sellprice-$product->opening_price) * $tquantity);
-                //     $lastquantity = $tquantity;
-                //     $lastbuyprice = $product->opening_price;
-                // }
-            }
-            else{
-                // $profit = ($sellprice - $product->purchase_price) * $quantity;
-                // $lastbuyprice= $product->purchase_price;
-                // $lastquantity=$quantity;
-                $devcomment = array();
-            }
 
             //Notificcation increase
             if($product->warning_quantity<$product->available_quantity && $product->warning_quantity>=$product->available_quantity-$quantity)
@@ -681,7 +648,6 @@ class Reports extends CI_Controller {
                     'debit' => $discount,
                     'credit' => '0',
                     'description' => "Pr-". sprintf("%06d", $dailys->id),
-                    'company_id' => $this->session->userdata('company_id')
                 );
                 $this->db->insert('ledgerposting', $datalist_payment1);
 
@@ -694,7 +660,7 @@ class Reports extends CI_Controller {
                     'debit' => '0',
                     'credit' => $discount,
                     'description' => "Pr-". sprintf("%06d", $dailys->id),
-                    'company_id' => $this->session->userdata('company_id')
+          
                 );
                 $this->db->insert('ledgerposting', $datalist_payment2);
             }
@@ -713,7 +679,7 @@ class Reports extends CI_Controller {
                     'date' => $this->input->post('date'),
                     'amount' => $received,
                     'description' => "Pr-". sprintf("%06d", $dailys->id),
-                    'company_id' => $this->session->userdata('company_id'),
+                  
                     'user_id' => $this->session->userdata('user_id')
 
                 );
@@ -730,7 +696,7 @@ class Reports extends CI_Controller {
                     'debit' => $received,
                     'credit' => '0',
                     'description' => "Pr-". sprintf("%06d", $dailys->id),
-                    'company_id' => $this->session->userdata('company_id')
+                 
                 );
                 $this->db->insert('ledgerposting', $datalist_payment1);
 
@@ -743,7 +709,7 @@ class Reports extends CI_Controller {
                     'debit' => '0',
                     'credit' => $received,
                     'description' => "Pr-". sprintf("%06d", $dailys->id),
-                    'company_id' => $this->session->userdata('company_id')
+                  
                 );
                 $this->db->insert('ledgerposting', $datalist_payment2);
             }
@@ -764,7 +730,7 @@ class Reports extends CI_Controller {
         $datef= date('Y-m-d');
         if ($this->session->userdata('loggedin') == 'yes' && ($this->session->userdata('role') == 'admin'||($dailys->date > $datef." 00:00:00" && $dailys->date < $datef." 23:59:59" ))):
 
-        $dailysell =$this->db->query("select s.*,p.category_id,p.available_quantity,p.warning_quantity from purchase_return as s left join products as p on s.product_id=p.id where s.invoice_id='$voucherid'")->result();
+        $dailysell =$this->db->query("select s.*,p.available_quantity,p.warning_quantity from purchase_return as s left join products as p on s.product_id=p.id where s.invoice_id='$voucherid'")->result();
 
         foreach ($dailysell as $key ) {
             $tarray = json_decode($key->devcomment);
@@ -807,7 +773,7 @@ class Reports extends CI_Controller {
 
     function deletepurchasese($invoiceid){
         $data['baseurl'] = $this->config->item('base_url');
-        $dailysell =$this->db->query("select s.*,p.category_id,p.available_quantity,p.warning_quantity from purchase_return as s left join products as p on s.product_id=p.id where s.id='$invoiceid'")->row();
+        $dailysell =$this->db->query("select s.*,p.available_quantity,p.warning_quantity from purchase_return as s left join products as p on s.product_id=p.id where s.id='$invoiceid'")->row();
         $tarray = json_decode($dailysell->devcomment);
         if(!empty($tarray)){
             foreach($tarray as $id => $row) {
@@ -848,13 +814,12 @@ class Reports extends CI_Controller {
     //--------------------------- Sales History ----------------------------
 
     function viewsellhistory() {
-        $company_id = $this->session->userdata('company_id');
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'sellhistory';
         $data['page_title'] = 'Sales History';
         $data['baseurl'] = $this->config->item('base_url');
         $data['role']=$this->session->userdata('role');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
 
             $sdate = $this->input->post('sdate') . ' 00:00:00';
             $edate = $this->input->post('edate') . ' 23:59:59';
@@ -873,11 +838,11 @@ class Reports extends CI_Controller {
 
             if ($data['cname'] == 'all'):
                
-                $data['selldata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.mobile,l.address,l.father_name,di.name as district_name,al.fullname from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as al on d.user_id=al.id WHERE  d.date between '$sdate' AND '$edate' AND d.company_id = '$company_id' order by d.id desc")->result();
+                $data['selldata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.mobile,l.address,l.father_name,di.name as district_name,al.fullname from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as al on d.user_id=al.id WHERE  d.date between '$sdate' AND '$edate' order by d.id desc")->result();
                 
             else:
                 
-                $data['selldata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.mobile,l.address,l.father_name,di.name as district_name,al.fullname from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id  left join alluser as al on d.user_id=al.id  WHERE  d.date between '$sdate' AND '$edate' AND d.customer_id=".$data['cname']." AND d.company_id = '$company_id' order by d.id desc")->result();
+                $data['selldata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.mobile,l.address,l.father_name,di.name as district_name,al.fullname from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id  left join alluser as al on d.user_id=al.id  WHERE  d.date between '$sdate' AND '$edate' AND d.customer_id=".$data['cname']."order by d.id desc")->result();
                 
             endif;
 
@@ -889,18 +854,17 @@ class Reports extends CI_Controller {
 
     function printinvoiceagain($invoiceid){
         $data['baseurl'] = $this->config->item('base_url');
-      if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+      if ($this->session->userdata('loggedin') == 'yes'):
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'sellhistory';
-        $company_id = $this->session->userdata('company_id');
-        $data['company'] = $this->db->query("select * from company where company_id = '$company_id'")->row();
+    
         $data['baseurl'] = $this->config->item('base_url');
-        $data['invoicedata'] = $this->db->query("select d.*,p.product_name ,u.name as unit_name from daily_sell as d left join products as p on d.product_id=p.id left join product_unit as u on d.unit=u.id where d.invoice_id = '$invoiceid' AND d.company_id = '$company_id'")->result();
+        $data['invoicedata'] = $this->db->query("select d.*,p.product_name ,u.name as unit_name from daily_sell as d left join products as p on d.product_id=p.id left join product_unit as u on d.unit=u.id where d.invoice_id = '$invoiceid'")->result();
         // echo '<pre>';
         // print_r($data['invoicedata']);
         // echo '</pre>';
         // die();
-        $data['voicedata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.father_name,l.mobile,l.address,di.name as district_name,ui.fullname  from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as ui on d.user_id=ui.id  where d.voucherid = '$invoiceid' AND d.company_id = '$company_id'")->row();
+        $data['voicedata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.father_name,l.mobile,l.address,di.name as district_name,ui.fullname  from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as ui on d.user_id=ui.id  where d.voucherid = '$invoiceid'")->row();
 
         $data['totalPrice'] =$data['voicedata']->total_price;
         //$data['vat'] =$data['voicedata']->vat;
@@ -922,12 +886,11 @@ class Reports extends CI_Controller {
     }
 
     function viewsellhistoryDetails() {
-        $company_id = $this->session->userdata('company_id');
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'selldetails';
         $data['page_title'] = 'Sales History';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
 
         $sdate = $this->input->post('sdate') . ' 00:00:00';
         $edate = $this->input->post('edate') . ' 23:59:59';
@@ -942,11 +905,11 @@ class Reports extends CI_Controller {
             $data['customerlist'] = $this->db->query("select l.ledgername,l.mobile,l.id,l.address,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where (l.accountgroupid=7 or l.accountgroupid=6) and l.status<>0")->result();
 
             if ($data['user'] == 'all'):
-                $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit,ds.id as sellid from daily_sell as d left join products as p on d.product_id=p.id left join accountledger as l on d.customer_id=l.id left join product_unit as u on d.unit=u.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid left join districts as di on l.district=di.id where d.date between '$sdate' AND '$edate' AND d.company_id = '$company_id'")->result();
-                $data['sellSummary']= $this->db->query("select sum(discount) as discount from daily_sell_summary WHERE date between '$sdate' AND '$edate' AND company_id = '$company_id'")->row(); 
+                $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit,ds.id as sellid from daily_sell as d left join products as p on d.product_id=p.id left join accountledger as l on d.customer_id=l.id left join product_unit as u on d.unit=u.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid left join districts as di on l.district=di.id where d.date between '$sdate' AND '$edate'")->result();
+                $data['sellSummary']= $this->db->query("select sum(discount) as discount from daily_sell_summary WHERE date between '$sdate' AND '$edate'")->row(); 
             else:
-                $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit,ds.id as sellid from daily_sell as d left join products as p on d.product_id=p.id left join accountledger as l on d.customer_id=l.id left join product_unit as u on d.unit=u.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid left join districts as di on l.district=di.id where d.date between '$sdate' AND '$edate' AND d.company_id = '$company_id' AND d.customer_id='$name'")->result();
-                $data['sellSummary']= $this->db->query("select sum(discount) as discount from daily_sell_summary WHERE date between '$sdate' AND '$edate' AND company_id = '$company_id' AND customer_id='$name'")->row(); 
+                $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit,ds.id as sellid from daily_sell as d left join products as p on d.product_id=p.id left join accountledger as l on d.customer_id=l.id left join product_unit as u on d.unit=u.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid left join districts as di on l.district=di.id where d.date between '$sdate' AND '$edate' AND d.customer_id='$name'")->result();
+                $data['sellSummary']= $this->db->query("select sum(discount) as discount from daily_sell_summary WHERE date between '$sdate' AND '$edate' AND customer_id='$name'")->row(); 
             endif;
 
         $this->load->view('report_derectory/selldetails', $data);
@@ -956,12 +919,12 @@ class Reports extends CI_Controller {
     }
 
     function sellhistory() {
-        $company_id = $this->session->userdata('company_id');
+     
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'sellhistory';
         $data['page_title'] = 'Sales History';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $sdate = date("Y-m-d") . ' 00:00:00';
             $edate = date("Y-m-d") . ' 23:59:59';
 
@@ -971,7 +934,7 @@ class Reports extends CI_Controller {
             $data['cname'] = 'all';
             $data['salesman']='';
 
-            $data['selldata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.mobile,l.address,l.father_name,di.name as district_name,al.fullname from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as al on d.user_id=al.id WHERE d.company_id = '$company_id' order by d.id desc limit 10")->result();
+            $data['selldata'] = $this->db->query("select d.*,l.ledgername as customer_name,l.mobile,l.address,l.father_name,di.name as district_name,al.fullname from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as al on d.user_id=al.id order by d.id desc limit 10")->result();
             $data['customerlist'] = $this->db->query("select l.ledgername,l.id,l.address,l.mobile,l.father_name,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where (l.accountgroupid=7 or l.accountgroupid=6) and l.status<>0")->result();
 
             $this->load->view('report_derectory/sellhistory', $data);
@@ -981,12 +944,12 @@ class Reports extends CI_Controller {
     }
 
     function detailssell($invoiceid = '0') {
-        $company_id = $this->session->userdata('company_id');
+      
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'sellhistory';
         $data['page_title'] = 'Sales History';
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $sdate = date("Y-m-d") . ' 00:00:00';
             $edate = date("Y-m-d") . ' 23:59:59';
 
@@ -997,8 +960,8 @@ class Reports extends CI_Controller {
             $data['invoiceid'] = $invoiceid;
             $data['customerlist'] = $this->db->query("select l.ledgername,l.id,l.address,l.mobile,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where (l.accountgroupid=7 or l.accountgroupid=6) and l.status<>0")->result();
 
-            $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.father_name,l.mobile,u.name as unit, ds.id as sellid from daily_sell as d left join products as p on d.product_id=p.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid left join accountledger as l on ds.customer_id=l.id left join product_unit as u on d.unit=u.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid where d.invoice_id = '$invoiceid' AND d.company_id = '$company_id'")->result();
-            $data['sellSummary']= $this->db->query("select discount from daily_sell_summary WHERE voucherid = '$invoiceid' AND company_id = '$company_id'")->row();
+            $data['selldata'] = $this->db->query("select d.*,p.product_name,l.ledgername,l.father_name,l.mobile,u.name as unit, ds.id as sellid from daily_sell as d left join products as p on d.product_id=p.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid left join accountledger as l on ds.customer_id=l.id left join product_unit as u on d.unit=u.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid where d.invoice_id = '$invoiceid'")->result();
+            $data['sellSummary']= $this->db->query("select discount from daily_sell_summary WHERE voucherid = '$invoiceid'")->row();
             
             $this->load->view('report_derectory/selldetails', $data);
         else:
@@ -1014,11 +977,11 @@ class Reports extends CI_Controller {
         $data['activesubmenu'] = 'supplier_report';
         $data['page_title'] = 'Supplier reports';
         $data['baseurl'] = $this->config->item('base_url');
-        $comid = $this->session->userdata('company_id');
+      
         $data['sdate'] = date("Y-m-d") . ' 00:00:00';
         $data['edate'] = date("Y-m-d") . ' 23:59:59';
-        $data['purchasedata'] = $this->db->query("select sum(total_buyprice) as totalpurchase,id,date,invoiceid from purchase where supplier_id = '$id' AND company_id = '$comid' group by invoiceid")->result();
-        $data['paymentdata'] = $this->db->query("select sum(amount) as totalpayment,id,date,invoiceid from payments where ledgerid = '$id' AND company_id = '$comid' group by invoiceid")->result();
+        $data['purchasedata'] = $this->db->query("select sum(total_buyprice) as totalpurchase,id,date,invoiceid from purchase where supplier_id = '$id' group by invoiceid")->result();
+        $data['paymentdata'] = $this->db->query("select sum(amount) as totalpayment,id,date,invoiceid from payments where ledgerid = '$id' group by invoiceid")->result();
         $this->load->view('supplier_reports', $data);
     }
     
@@ -1031,7 +994,7 @@ class Reports extends CI_Controller {
         $data['edate'] = $this->input->post('edate');
 
         $data['baseurl'] = $this->config->item('base_url');
-        $comid = $this->session->userdata('company_id');
+       
 
         $sdate = $this->input->post('sdate') . ' 00:00:00';
         $edate = $this->input->post('edate') . ' 23:59:59';
@@ -1041,11 +1004,11 @@ class Reports extends CI_Controller {
 
 
         if ($supplier == 'all'):
-            $data['purchasedata'] = $this->db->query("select sum(total_buyprice) as totalpurchase,id,date,invoiceid from purchase where date between '$sdate' AND '$edate' AND company_id = '$comid' group by invoiceid")->result();
-            $data['paymentdata'] = $this->db->query("select sum(amount) as totalpayment,id,date,invoiceid from payments where date between '$sdate' AND '$edate' AND company_id = '$comid' group by invoiceid")->result();
+            $data['purchasedata'] = $this->db->query("select sum(total_buyprice) as totalpurchase,id,date,invoiceid from purchase where date between '$sdate' AND '$edate' group by invoiceid")->result();
+            $data['paymentdata'] = $this->db->query("select sum(amount) as totalpayment,id,date,invoiceid from payments where date between '$sdate' AND '$edate' group by invoiceid")->result();
         else:
-            $data['purchasedata'] = $this->db->query("select sum(total_buyprice) as totalpurchase,id,date,invoiceid from purchase where supplier_id = '$supplier' AND date between '$sdate' AND '$edate' AND company_id = '$comid' group by invoiceid")->result();
-            $data['paymentdata'] = $this->db->query("select sum(amount) as totalpayment,id,date,invoiceid from payments where ledgerid = '$supplier' AND date between '$sdate' AND '$edate' AND company_id = '$comid' group by invoiceid")->result();
+            $data['purchasedata'] = $this->db->query("select sum(total_buyprice) as totalpurchase,id,date,invoiceid from purchase where supplier_id = '$supplier' AND date between '$sdate' AND '$edate'  group by invoiceid")->result();
+            $data['paymentdata'] = $this->db->query("select sum(amount) as totalpayment,id,date,invoiceid from payments where ledgerid = '$supplier' AND date between '$sdate' AND '$edate' group by invoiceid")->result();
         endif;
         $this->load->view('supplier_reports', $data);
     }
@@ -1056,7 +1019,6 @@ class Reports extends CI_Controller {
         $data['activesubmenu'] = 'customer_report';
         $data['page_title'] = 'Customer reports';
         $data['baseurl'] = $this->config->item('base_url');
-        $comid = $this->session->userdata('company_id');
 
         $data['sdate'] = date("Y-m-d");
         $data['edate'] = date("Y-m-d");
@@ -1064,8 +1026,8 @@ class Reports extends CI_Controller {
         $sdate = date("Y-m-d") . ' 00:00:00';
         $edate = date("Y-m-d") . ' 23:59:59';
 
-        $data['selldata'] = $this->db->query("select * from daily_sell where buyername = '$id' AND date between '$sdate' AND '$edate' AND company_id = '$comid' group by invoice_id")->result();
-        $data['receivedata'] = $this->db->query("select * from received where ledgerid = '$id' AND date between '$sdate' AND '$edate' AND company_id = '$comid' group by invoiceid")->result();
+        $data['selldata'] = $this->db->query("select * from daily_sell where buyername = '$id' AND date between '$sdate' AND '$edate' group by invoice_id")->result();
+        $data['receivedata'] = $this->db->query("select * from received where ledgerid = '$id' AND date between '$sdate' AND '$edate' group by invoiceid")->result();
         $this->load->view('customer_reports', $data);
     }
 
@@ -1076,8 +1038,6 @@ class Reports extends CI_Controller {
 
         $data['baseurl'] = $this->config->item('base_url');
 
-        $comid = $this->session->userdata('company_id');
-
         $sdate = $this->input->post('sdate') . ' 00:00:00';
         $edate = $this->input->post('edate') . ' 23:59:59';
         $data['sdate'] = $this->input->post('sdate');
@@ -1087,12 +1047,12 @@ class Reports extends CI_Controller {
 
         $data['customer'] = $customerid;
 
-        $data['selldata'] = $this->db->query("select * from daily_sell where buyername = '$customerid' AND date between '$sdate' AND '$edate' AND company_id = '$comid' group by invoice_id")->result();
-        $data['receivedata'] = $this->db->query("select * from received where ledgerid = '$customerid' AND date between '$sdate' AND '$edate' AND company_id = '$comid' group by invoiceid")->result();
+        $data['selldata'] = $this->db->query("select * from daily_sell where buyername = '$customerid' AND date between '$sdate' AND '$edate'  group by invoice_id")->result();
+        $data['receivedata'] = $this->db->query("select * from received where ledgerid = '$customerid' AND date between '$sdate' AND '$edate'  group by invoiceid")->result();
         $this->load->view('customer_reports', $data);
     }
 
-    function rawstock($subCategory=0,$cat=0) {
+    function rawstock() {
 
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'rawstock';
@@ -1100,61 +1060,18 @@ class Reports extends CI_Controller {
         $data['baseurl'] = $this->config->item('base_url');
         $data['pgname'] = '';
         $qmax= -999999; $qmin= 999999;
-        $company_id = $this->session->userdata('company_id');
-        $data['sub_category']= $data['category_id']=$category =$sub_category='';
-        if($this->session->userdata('fcategory')!='true')
-        $data['sub_category']= $data['category_id']=$category =$sub_category='1';
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
-
-             $data['allcategory'] = $this->db->query("select id,name from category where company_id ='".$company_id."' order by name asc")->result();
+        $data['product'] = $this->db->query("select p.*,u.name  as unit_name from products as p left join product_unit as u on p.unit_id=u.id order by p.product_name asc")->result();
 
 
-            if($this->input->post('sub_category'))
-            {
-                $data['sub_category']=$sub_category = $this->input->post('sub_category');
-                $data['category_id']=$category = $this->input->post('category_id');
-                if(($this->input->post('qgt')&& $this->input->post('qmax')=='')||($this->input->post('qlt')&& $this->input->post('qmin')=='')){
-                    $this->session->set_userdata('failed', 'Pls Insert Number if checked any');
-                    redirect('reports/rawstock');
-                }
-                else if($this->input->post('qgt')) $qmax= $this->input->post('qmax');
-                else if($this->input->post('qlt')) $qmax= $this->input->post('qmin');
-            }
-
-  
-            if($sub_category==-1&&$category!=-1){
-            $data['product'] = $this->db->query("select p.*,u.name  as unit_name,c.name as category_name,sc.name as sub_category  from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id where p.company_id='$company_id' and c.id='$category' order by p.product_name asc")->result();
-            }
-
-            else if($sub_category==-1&&$category==-1){
-            $data['product'] = $this->db->query("select p.*,u.name  as unit_name,c.name as category_name,sc.name as sub_category  from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id where p.company_id='$company_id' order by p.product_name asc")->result();
-            }
-            else if($sub_category!=-1&&$category!=-1&&$sub_category!=''){
-            $data['product'] = $this->db->query("select p.*,u.name  as unit_name,c.name as category_name,sc.name as sub_category  from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id where p.company_id='$company_id' and sc.id='$sub_category' and c.id='$category' order by p.product_name asc")->result();
-            }
-            else{
-                $data['product'] = array();
-            }
-
-            if($category==-1)
-            $data['subCategory'] = $this->db->get_where('sub_category', array('company_id' => $this->session->userdata('company_id')))->result();
-            else
-                $data['subCategory'] = $this->db->get_where('sub_category', array('company_id' => $this->session->userdata('company_id'),'category_id'=>$category))->result();
-
-            $data['sub_category'] = $sub_category;
-            $data['cat'] = $category;
-            
-
-            $this->load->view('report_derectory/stock', $data);
-        else:
-            $data['baseurl'] = $this->config->item('base_url');
-            $this->load->view('login', $data);
-        endif;
+        $this->load->view('report_derectory/stock', $data);
+    
+        $data['baseurl'] = $this->config->item('base_url');
+        $this->load->view('login', $data);
     }
 
     function viewstock() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $data['activemenu'] = 'reports';
             $data['activesubmenu'] = 'rawstock';
             $data['page_title'] = 'Available stock';
@@ -1165,12 +1082,12 @@ class Reports extends CI_Controller {
             
             $pgname = $this->input->post('pgname');
 
-            $comapnyid = $this->session->userdata('company_id');
+    
 
             if ($pgname == 'all'):
-                $data['product'] = $this->db->query("select p.*,u.name  as unit_name,c.name as category_name,l.ledgername as suppliername,l.id as ledger_id from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category=c.id left join accountledger as l on p.supplier=l.id where p.company_id='$comapnyid' order by p.pname asc")->result();
+                $data['product'] = $this->db->query("select p.*,u.name  as unit_name,l.ledgername as suppliername,l.id as ledger_id from products as p left join product_unit as u on p.unit_id=u.id  left join accountledger as l on p.supplier=l.id order by p.pname asc")->result();
             else:
-                $data['product'] = $this->db->query("select p.*,u.name  as unit_name,c.name as category_name,l.ledgername as suppliername,l.id as ledger_id from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category=c.id left join accountledger as l on p.supplier=l.id where p.company_id='$comapnyid' order by p.pname asc")->result();
+                $data['product'] = $this->db->query("select p.*,u.name  as unit_name,l.ledgername as suppliername,l.id as ledger_id from products as p left join product_unit as u on p.unit_id=u.id  left join accountledger as l on p.supplier=l.id order by p.pname asc")->result();
             endif;
 
             $this->load->view('stock', $data);
@@ -1182,7 +1099,7 @@ class Reports extends CI_Controller {
 
     function singlelist($id) {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $data['activemenu'] = 'reports';
             $data['activesubmenu'] = 'stockDetails';
             $data['page_title'] = 'Available stock';
@@ -1221,7 +1138,7 @@ class Reports extends CI_Controller {
             $data['unit'] =  $temp->unit;   
             $data['openingQuantity']= $temp->opening_quantity;
             $openingadjustment = 0;
-            $data['category_id']=$temp->category_id;
+           
 
 
             $purchaseQuantity = $this->db->query("select sum(quantity) as q from purchase where product_id='".$data['product']."' and date < '".$data['sdate']."'")->row()->q;
@@ -1251,18 +1168,14 @@ class Reports extends CI_Controller {
 
     //-------------------------- CSV file export --------------------------------->
 
-    function exports_data($sub_category,$category){
-        $company_id = $this->session->userdata('company_id');
-            if($sub_category==-1&&$category!=-1){
-            $product = $this->db->query("select p.product_id,p.category_id,p.product_name,c.name as category_name,sc.name as sub_category,p.purchase_price,available_quantity, u.name  as unit_name,(purchase_price*available_quantity) as total from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id where p.company_id='$company_id' and c.id='$category' order by p.id asc")->result_array();
-            }
+    function exports_data(){
+      
 
-            else if($sub_category==-1&&$category==-1){
-            $product= $this->db->query("select p.product_id,p.category_id,p.product_name,c.name as category_name,sc.name as sub_category,p.purchase_price,available_quantity, u.name  as unit_name,(purchase_price*available_quantity) as total from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id where p.company_id='$company_id' order by p.id asc")->result_array();
-            }
-            else if($sub_category!=-1&&$category!=-1&&$sub_category!=''){
-            $product = $this->db->query("select p.product_id,p.category_id,p.product_name,c.name as category_name,sc.name as sub_category,p.purchase_price,available_quantity, u.name  as unit_name,(purchase_price*available_quantity) as total  from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id where p.company_id='$company_id' and sc.id='$sub_category' and c.id='$category' order by p.id asc")->result_array();
-            }
+           
+            $product= $this->db->query("select p.product_id,p.product_name,p.purchase_price,available_quantity, u.name  as unit_name,(purchase_price*available_quantity) as total from products as p left join product_unit as u on p.unit_id=u.id order by p.id asc")->result_array();
+            
+            
+            
 
            $sum = 0;
 
@@ -1272,20 +1185,18 @@ class Reports extends CI_Controller {
             header("Expires: 0");
             $handle = fopen('php://output', 'w');
            
-            $header = array("Id","Name","Category","Sub Category","Unit Price","Available Quantity","Unit","Total Price"); 
+            $header = array("Id","Name","Unit Price","Available Quantity","Unit","Total Price"); 
             fputcsv($handle, $header);
 
             foreach ($product as $key=>$line){ 
                $arr[0]= $line['product_id']; 
                $data = chr(255).chr(254).iconv("UTF-8", "UTF-16LE//IGNORE", $line['product_name']);
                $arr[1]=substr($data,2);
-               $arr[2]= $line['category_name'];   
-               $arr[3]= $line['sub_category'];   
-               $arr[4]= $line['purchase_price']; 
-               $arr[5]= $line['available_quantity'];  
-               $arr[6]= $line['unit_name']; 
-               $arr[7]= $line['total'];
-               $sum = $sum + $arr[7];    
+               $arr[2]= $line['purchase_price']; 
+               $arr[3]= $line['available_quantity'];  
+               $arr[4]= $line['unit_name']; 
+               $arr[5]= $line['total'];
+               $sum = $sum + $arr[5];    
                fputcsv($handle, $arr);         
             }
             $header2 = array("","","","","","","Total",$sum); 
@@ -1349,7 +1260,7 @@ class Reports extends CI_Controller {
 
     function supcusbalance(){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $data['activemenu'] = 'reports';
             $data['activesubmenu'] = 'supcusbalance';
             $data['page_title'] = 'Supplier / Customer Balance';
@@ -1391,10 +1302,9 @@ class Reports extends CI_Controller {
 
     function received(){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $data['activemenu'] = 'reports';
             $data['activesubmenu'] = 'received';
-            $company_id = $this->session->userdata('company_id');
             $data['baseurl'] = $this->config->item('base_url');
             $sdate=$data['sdate']=date('Y-m-d');
             $edate=$data['edate']=date('Y-m-d');
@@ -1407,7 +1317,7 @@ class Reports extends CI_Controller {
                 $edate=$edate.' 23:59:59';
             }
 
-            $data['payments'] = $this->db->query("select p.*,u.fullname from received as p left join alluser as u on p.user_id=u.id where p.company_id = '$company_id' and p.date between '$sdate' and '$edate' order by p.id desc ")->result();
+            $data['payments'] = $this->db->query("select p.*,u.fullname from received as p left join alluser as u on p.user_id=u.id where p.date between '$sdate' and '$edate' order by p.id desc ")->result();
 
 
             $this->load->view('report_derectory/received', $data);
@@ -1421,12 +1331,11 @@ class Reports extends CI_Controller {
 
     function receivedshow($id){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $data['activemenu'] = 'reports';
             $data['activesubmenu'] = 'received';
-            $company_id = $this->session->userdata('company_id');
             $data['baseurl'] = $this->config->item('base_url');
-            $data['received'] = $this->db->query("select p.*,l.ledgername,l.accountgroupid,l.address,d.name as district_name,l.father_name,l.mobile,u.fullname  from received as p left join accountledger as l on p.ledgerid=l.id left join districts as d on l.district=d.id left join alluser as u on p.user_id=u.id where p.company_id = '$company_id' and p.id ='$id'")->row();
+            $data['received'] = $this->db->query("select p.*,l.ledgername,l.accountgroupid,l.address,d.name as district_name,l.father_name,l.mobile,u.fullname  from received as p left join accountledger as l on p.ledgerid=l.id left join districts as d on l.district=d.id left join alluser as u on p.user_id=u.id where p.id ='$id'")->row();
 
             $data['inword'] = convert_number(round($data['received']->amount));
             
@@ -1454,10 +1363,10 @@ class Reports extends CI_Controller {
 
     function payment(){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $data['activemenu'] = 'reports';
             $data['activesubmenu'] = 'payment';
-            $company_id = $this->session->userdata('company_id');
+            
             $data['baseurl'] = $this->config->item('base_url');
             $sdate=$data['sdate']=date('Y-m-d');
             $edate=$data['edate']=date('Y-m-d');
@@ -1470,7 +1379,7 @@ class Reports extends CI_Controller {
                 $edate=$edate.' 23:59:59';
             }
 
-            $data['payments'] = $this->db->query("select p.*,u.fullname from payments as p left join alluser as u on p.user_id=u.id where p.company_id = '$company_id' and p.date between '$sdate' and '$edate' order by p.id desc ")->result();
+            $data['payments'] = $this->db->query("select p.*,u.fullname from payments as p left join alluser as u on p.user_id=u.id where p.date between '$sdate' and '$edate' order by p.id desc ")->result();
 
 
             $this->load->view('report_derectory/payment', $data);
@@ -1485,12 +1394,12 @@ class Reports extends CI_Controller {
 
     function paymentshow($id){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes' ):
             $data['activemenu'] = 'reports';
             $data['activesubmenu'] = 'payment';
-            $company_id = $this->session->userdata('company_id');
+           
             $data['baseurl'] = $this->config->item('base_url');
-            $data['payments'] = $this->db->query("select p.*,l.ledgername,l.address,l.accountgroupid,d.name as district_name,l.father_name,l.mobile,u.fullname  from payments as p left join accountledger as l on p.ledgerid=l.id left join districts as d on l.district=d.id  left join alluser as u on p.user_id=u.id  where p.company_id = '$company_id' and p.id ='$id'")->row();
+            $data['payments'] = $this->db->query("select p.*,l.ledgername,l.address,l.accountgroupid,d.name as district_name,l.father_name,l.mobile,u.fullname  from payments as p left join accountledger as l on p.ledgerid=l.id left join districts as d on l.district=d.id  left join alluser as u on p.user_id=u.id  where p.id ='$id'")->row();
 
             $data['inword'] = convert_number(round($data['payments']->amount));
             $this->load->view('report_derectory/payment_voucher_show', $data);
@@ -1510,21 +1419,19 @@ class Reports extends CI_Controller {
         if ($this->session->userdata('loggedin') == 'yes' && ($this->session->userdata('role') == 'admin'||($data['sellsummary']->date > $datef." 00:00:00" && $data['sellsummary']->date < $datef." 23:59:59" ))):
         $data['activemenu'] = 'reports';
         $data['activesubmenu'] = 'sellhistory';
-        $company_id = $this->session->userdata('company_id');
+        
         $data['baseurl'] = $this->config->item('base_url');
         $data['randsellid']=$invoiceid;
-        $data['category_id']=1;
-        $data['sub_category']=1;
+       
         
         if($data['sellsummary']=="")
             return $this->sellhistory();
            
         $data['customer'] = $data['sellsummary']->customer_id;
-        $data['productlist']=$this->db->query("select id,product_name,category_id,sub_category from products where company_id ='".$company_id."' order by product_name asc")->result();
-        $data['allcategory']=$this->db->query("select * from category")->result();
-        $data['subCategory']=$this->db->query("select * from sub_category")->result();
-        $data['selldata'] = $this->db->query("select s.*,p.product_name as name,p.category_id,p.sub_category,p.unit as unit_id ,u.name as unit_name from daily_sell as s left join products as p on s.product_id=p.id left join product_unit as u on p.unit=u.id where s.invoice_id='$invoiceid' order by id desc")->result();
-        $data['getcustomer'] = $this->db->query("select l.id,l.ledgername,l.address,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where l.accountgroupid = '16' and l.company_id = '$company_id' order by l.ledgername")->result();
+        $data['productlist']=$this->db->query("select id,product_name from products order by product_name asc")->result();
+        
+        $data['selldata'] = $this->db->query("select s.*,p.product_name as name,p.unit_id as unit_id ,u.name as unit_name from daily_sell as s left join products as p on s.product_id=p.id left join product_unit as u on p.unit_id=u.id where s.invoice_id='$invoiceid' order by id desc")->result();
+        $data['getcustomer'] = $this->db->query("select l.id,l.ledgername,l.address,d.name as district_name from accountledger as l left join districts as d on l.district=d.id where l.accountgroupid = '16' order by l.ledgername")->result();
             $this->load->view('report_derectory/editsell',$data);
         else:
         $this->session->set_userdata('failed','Only Admin Access This Function');
@@ -1590,7 +1497,6 @@ class Reports extends CI_Controller {
                     'debit' => $discount,
                     'credit' => '0',
                     'description' => "Inv-". sprintf("%06d", $dailys->id),
-                    'company_id' => $this->session->userdata('company_id')
                 );
                 $this->db->insert('ledgerposting', $datalist_payment1);
 
@@ -1603,7 +1509,6 @@ class Reports extends CI_Controller {
                     'debit' => '0',
                     'credit' => $discount,
                     'description' => "Inv-". sprintf("%06d", $dailys->id),
-                    'company_id' => $this->session->userdata('company_id')
                 );
                 $this->db->insert('ledgerposting', $datalist_payment2);
             }
@@ -1624,7 +1529,6 @@ class Reports extends CI_Controller {
                 'credit' => 0,
                 'vouchertype' => 'Received voucher',
                 'description' => "Inv-". sprintf("%06d", $dailys->id),
-                'company_id' => $this->session->userdata('company_id')
             );
             $this->db->insert('ledgerposting', $datalist);
             $datalist2 = array(
@@ -1635,7 +1539,6 @@ class Reports extends CI_Controller {
                 'credit' => $paidAmount,
                 'vouchertype' => 'Received voucher',
                 'description' => "Inv-". sprintf("%06d", $dailys->id),
-                'company_id' => $this->session->userdata('company_id')
             );
             $this->db->insert('ledgerposting', $datalist2);
 
@@ -1646,7 +1549,6 @@ class Reports extends CI_Controller {
                     'amount' => $paidAmount,
                     'user_id' => $this->session->userdata('user_id'),
                     'description' => "Inv-". sprintf("%06d", $dailys->id),
-                    'company_id' => $this->session->userdata('company_id'),
                 );
                 $this->db->insert('received', $datalist);
 
@@ -1662,7 +1564,7 @@ class Reports extends CI_Controller {
     function deletese($invoiceid){
         
         $data['baseurl'] = $this->config->item('base_url');
-        $dailysell =$this->db->query("select s.*,p.category_id,p.available_quantity,p.warning_quantity from daily_sell as s left join products as p on s.product_id=p.id where s.id='$invoiceid'")->row();
+        $dailysell =$this->db->query("select s.*,p.available_quantity,p.warning_quantity from daily_sell as s left join products as p on s.product_id=p.id where s.id='$invoiceid'")->row();
 
         $tarray = json_decode($dailysell->devcomment);
         if(!empty($tarray)){
@@ -1705,7 +1607,7 @@ class Reports extends CI_Controller {
         $datef= date('Y-m-d');
         if ($this->session->userdata('loggedin') == 'yes' && ($this->session->userdata('role') == 'admin'||($dailys->date > $datef." 00:00:00" && $dailys->date < $datef." 23:59:59" ))):
 
-        $dailysell =$this->db->query("select s.*,p.category_id,p.available_quantity,p.warning_quantity from daily_sell as s left join products as p on s.product_id=p.id where s.invoice_id='$voucherid'")->result();
+        $dailysell =$this->db->query("select s.*,p.available_quantity,p.warning_quantity from daily_sell as s left join products as p on s.product_id=p.id where s.invoice_id='$voucherid'")->result();
         foreach ($dailysell as $key ) {
 
             $tarray = json_decode($key->devcomment);
@@ -1757,9 +1659,7 @@ class Reports extends CI_Controller {
         $product_id=$this->input->post("product_id");
         $sellprice=$this->input->post("sellprice");
         $quantity=$this->input->post("quantity");
-        $category_id = $this->input->post("category_id");
-
-        $pcategory_id = $this->input->post("pcategory_id");
+    
 
 
         $product = $this->db->query("select * from products where id='$product_id'")->row();
@@ -1779,7 +1679,7 @@ class Reports extends CI_Controller {
         
             $this->db->query("update products set available_quantity = available_quantity-'$quantity' where id = '$product_id'");
 
-            if($category_id!=6){
+          
                 $purchase = $this->db->query("select id,a_quantity,buyprice from purchase where product_id='$product_id' and a_quantity>0 order by id asc")->result();
                 $devcomment = array();
                 $profit= 0;
@@ -1806,13 +1706,7 @@ class Reports extends CI_Controller {
                     $lastquantity = $tquantity;
                     $lastbuyprice = $product->opening_price;
                 }
-            }
-            else{
-                $profit = ($sellprice - $product->purchase_price) * $quantity;
-                $lastbuyprice= $product->purchase_price;
-                $lastquantity=$quantity;
-                $devcomment = array();
-            }
+           
 
             //Notificcation increase
             if($product->warning_quantity<$product->available_quantity && $product->warning_quantity>=$product->available_quantity-$quantity)
@@ -1845,10 +1739,9 @@ class Reports extends CI_Controller {
         $data['activesubmenu'] = 'notification';
         $data['page_title'] = 'Notification';
         $data['baseurl'] = $this->config->item('base_url');
-        $companyid = $this->session->userdata('company_id');
         
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
-            $data['product'] = $this->db->query("select p.*,u.name  as unit_name,au.fullname,c.name as category_name,sc.name as sub_category  from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id left join alluser as au on p.user_id=au.id where p.company_id='$companyid' and p.available_quantity <= p.warning_quantity and p.status=1 order by p.product_name asc")->result();
+        if ($this->session->userdata('loggedin') == 'yes' ):
+            $data['product'] = $this->db->query("select p.*,u.name  as unit_name,au.fullname  from products as p left join product_unit as u on p.unit_id=u.id left join alluser as au on p.user_id=au.id where p.available_quantity <= p.warning_quantity and p.status=1 order by p.product_name asc")->result();
 
             $this->load->view('report_derectory/notification', $data);
         else:
@@ -1866,10 +1759,10 @@ class Reports extends CI_Controller {
     }
 
     public function exports_notification(){
-        $companyid = $this->session->userdata('company_id');
+       
         
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
-            $product = $this->db->query("select p.*,u.name  as unit_name,au.fullname,c.name as category_name,sc.name as sub_category  from products as p left join product_unit as u on p.unit=u.id left join category as c on p.category_id=c.id left join sub_category as sc on p.sub_category=sc.id left join alluser as au on p.user_id=au.id where p.company_id='$companyid' and p.available_quantity <= p.warning_quantity and p.status=1 order by p.product_name asc")->result();
+        if ($this->session->userdata('loggedin') == 'yes' ):
+            $product = $this->db->query("select p.*,u.name  as unit_name,au.fullname from products as p left join product_unit as u on p.unit_id=u.id left join alluser as au on p.user_id=au.id where and p.available_quantity <= p.warning_quantity and p.status=1 order by p.product_name asc")->result();
 
             header("Content-type: application/csv");
             header("Content-Disposition: attachment; filename=\"Notification".date('Y-m-d H:i:s').".csv\"");
@@ -1877,15 +1770,13 @@ class Reports extends CI_Controller {
             header("Expires: 0");
             $handle = fopen('php://output', 'w');
            
-            $header = array("Name","Product ID","Category","Sub Category","Available Quantity","Warning Quantity","Unit"); 
+            $header = array("Name","Product ID","Available Quantity","Warning Quantity","Unit"); 
             fputcsv($handle, $header);
 
             foreach ($product as $prodata){  
                $data = chr(255).chr(254).iconv("UTF-8", "UTF-16LE//IGNORE", $prodata->product_name);
                $arr[0]=substr($data,2);
                $arr[1]= $prodata->product_id;   
-               $arr[2]= $prodata->category_name;   
-               $arr[3]= $prodata->sub_category; 
                $arr[4]=number_format(($prodata->available_quantity),2);
                $arr[5]=number_format(($prodata->warning_quantity),2); 
                $arr[6]=$prodata->unit_name; 
@@ -1920,7 +1811,6 @@ class Reports extends CI_Controller {
 
     // ------------------excel export------------- 
     function export_sellhistory($sdate1,$edate1,$cname) {
-        $company_id = $this->session->userdata('company_id');
         
         $sdate =  $sdate1. ' 00:00:00';
         $edate =  $edate1. ' 23:59:59';
@@ -1929,11 +1819,11 @@ class Reports extends CI_Controller {
 
         if($cname=='all'){
             $customer = 'All Customer';
-            $selldata = $this->db->query("select d.*,l.ledgername as customer_name,l.mobile,l.address,l.father_name,di.name as district_name,al.fullname from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as al on d.user_id=al.id WHERE d.company_id = '$company_id' and d.date between '$sdate' and '$edate'")->result();
+            $selldata = $this->db->query("select d.*,l.ledgername as customer_name,l.mobile,l.address,l.father_name,di.name as district_name,al.fullname from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as al on d.user_id=al.id WHERE d.date between '$sdate' and '$edate'")->result();
         }
         else {
             $customer=$data['customerlist']->ledgername;
-            $selldata = $this->db->query("select d.*,l.ledgername as customer_name,l.mobile,l.address,l.father_name,di.name as district_name,al.fullname from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as al on d.user_id=al.id WHERE d.customer_id='$cname' and d.company_id = '$company_id' and d.date between '$sdate' and '$edate'")->result();
+            $selldata = $this->db->query("select d.*,l.ledgername as customer_name,l.mobile,l.address,l.father_name,di.name as district_name,al.fullname from daily_sell_summary as d left join accountledger as l on d.customer_id=l.id left join districts as di on l.district=di.id left join alluser as al on d.user_id=al.id WHERE d.customer_id='$cname' and d.date between '$sdate' and '$edate'")->result();
         }
 
 
@@ -1966,16 +1856,14 @@ class Reports extends CI_Controller {
     }
 
     function export_purchasehistory($sdate1,$edate1,$cname) {
-        $company_id = $this->session->userdata('company_id');
-        
         $sdate =  $sdate1. ' 00:00:00';
         $edate =  $edate1. ' 23:59:59';
 
         if($cname=='all'){
-            $purchasedata = $this->db->query("select p.*,l.ledgername,l.address,l.father_name,l.mobile,d.name as district_name,al.fullname from purchase_summary as p left join accountledger as l on p.supplier_id=l.id left join districts as d on l.district=d.id left join alluser as al on p.user_id=al.id  where p.company_id = '$company_id' and p.date between '$sdate' and '$edate' order by p.id desc")->result();
+            $purchasedata = $this->db->query("select p.*,l.ledgername,l.address,l.father_name,l.mobile,d.name as district_name,al.fullname from purchase_summary as p left join accountledger as l on p.supplier_id=l.id left join districts as d on l.district=d.id left join alluser as al on p.user_id=al.id  where p.date between '$sdate' and '$edate' order by p.id desc")->result();
         }
         else{
-            $purchasedata = $this->db->query("select p.*,l.ledgername,l.address,l.father_name,l.mobile,d.name as district_name,al.fullname from purchase_summary as p left join accountledger as l on p.supplier_id=l.id left join districts as d on l.district=d.id left join alluser as al on p.user_id=al.id where p.company_id = '$company_id' and p.date between '$sdate' and '$edate' and p.supplier_id='$cname' order by p.id desc")->result();
+            $purchasedata = $this->db->query("select p.*,l.ledgername,l.address,l.father_name,l.mobile,d.name as district_name,al.fullname from purchase_summary as p left join accountledger as l on p.supplier_id=l.id left join districts as d on l.district=d.id left join alluser as al on p.user_id=al.id where p.date between '$sdate' and '$edate' and p.supplier_id='$cname' order by p.id desc")->result();
         }
 
 
@@ -2011,16 +1899,14 @@ class Reports extends CI_Controller {
     }
 
     function export_selldetails($sdate1,$edate1,$cname) {
-        $company_id = $this->session->userdata('company_id');
-        
         $sdate =  $sdate1. ' 00:00:00';
         $edate =  $edate1. ' 23:59:59';
 
         if($cname=='all'){
-            $selldata = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit, ds.id as sellid from daily_sell as d left join products as p on d.product_id=p.id left join accountledger as l on d.customer_id=l.id left join product_unit as u on d.unit=u.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid left join districts as di on l.district=di.id   where d.date between '$sdate' AND '$edate' AND d.company_id = '$company_id'")->result();
+            $selldata = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit, ds.id as sellid from daily_sell as d left join products as p on d.product_id=p.id left join accountledger as l on d.customer_id=l.id left join product_unit as u on d.unit=u.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid left join districts as di on l.district=di.id   where d.date between '$sdate' AND '$edate'")->result();
         }
         else{
-            $selldata = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit, ds.id as sellid from daily_sell as d left join products as p on d.product_id=p.id left join accountledger as l on d.customer_id=l.id left join product_unit as u on d.unit=u.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid left join districts as di on l.district=di.id   where d.date between '$sdate' AND '$edate' AND d.company_id = '$company_id' and d.customer_id='$cname'")->result();
+            $selldata = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit, ds.id as sellid from daily_sell as d left join products as p on d.product_id=p.id left join accountledger as l on d.customer_id=l.id left join product_unit as u on d.unit=u.id left join daily_sell_summary as ds on d.invoice_id=ds.voucherid left join districts as di on l.district=di.id   where d.date between '$sdate' AND '$edate' AND d.customer_id='$cname'")->result();
         }
 
         header("Content-type: application/csv");
@@ -2056,16 +1942,14 @@ class Reports extends CI_Controller {
     }
 
     function export_purchasedetails($sdate1,$edate1,$cname='all') {
-        $company_id = $this->session->userdata('company_id');
-        
         $sdate =  $sdate1. ' 00:00:00';
         $edate =  $edate1. ' 23:59:59';
 
         if($cname=='all'){
-            $selldata = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit, ds.id as sellid from purchase as d left join products as p on d.product_id=p.id left join accountledger as l on d.supplier_id=l.id left join product_unit as u on d.unit=u.id left join purchase_summary as ds on d.invoiceid=ds.invoiceid left join districts as di on l.district=di.id   where d.date between '$sdate' AND '$edate' AND d.company_id = '$company_id'")->result();
+            $selldata = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit, ds.id as sellid from purchase as d left join products as p on d.product_id=p.id left join accountledger as l on d.supplier_id=l.id left join product_unit as u on d.unit=u.id left join purchase_summary as ds on d.invoiceid=ds.invoiceid left join districts as di on l.district=di.id   where d.date between '$sdate' AND '$edate'")->result();
         }
         else{
-            $selldata = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit, ds.id as sellid from purchase as d left join products as p on d.product_id=p.id left join accountledger as l on d.supplier_id=l.id left join product_unit as u on d.unit=u.id left join purchase_summary as ds on d.invoiceid=ds.invoiceid left join districts as di on l.district=di.id   where d.date between '$sdate' AND '$edate' AND d.company_id = '$company_id' and d.supplier_id='$cname'")->result();
+            $selldata = $this->db->query("select d.*,p.product_name,l.ledgername,l.address,l.father_name,l.mobile,di.name as district_name,u.name as unit, ds.id as sellid from purchase as d left join products as p on d.product_id=p.id left join accountledger as l on d.supplier_id=l.id left join product_unit as u on d.unit=u.id left join purchase_summary as ds on d.invoiceid=ds.invoiceid left join districts as di on l.district=di.id   where d.date between '$sdate' AND '$edate' AND d.supplier_id='$cname'")->result();
         }
 
         header("Content-type: application/csv");
@@ -2104,12 +1988,11 @@ class Reports extends CI_Controller {
     }
 
     function export_payment($sdate1,$edate1) {
-        $company_id = $this->session->userdata('company_id');
-        
+       
         $sdate =  $sdate1. ' 00:00:00';
         $edate =  $edate1. ' 23:59:59';
         
-        $payments = $this->db->query("select p.*,u.fullname from payments as p left join alluser as u on p.user_id=u.id where p.company_id = '$company_id' and p.date between '$sdate' and '$edate' order by p.id desc ")->result();
+        $payments = $this->db->query("select p.*,u.fullname from payments as p left join alluser as u on p.user_id=u.id where p.date between '$sdate' and '$edate' order by p.id desc ")->result();
 
 
         header("Content-type: application/csv");
@@ -2144,12 +2027,10 @@ class Reports extends CI_Controller {
     }
 
     function export_received($sdate1,$edate1) {
-        $company_id = $this->session->userdata('company_id');
-        
         $sdate =  $sdate1. ' 00:00:00';
         $edate =  $edate1. ' 23:59:59';
         
-        $payments = $this->db->query("select p.*,u.fullname from received as p left join alluser as u on p.user_id=u.id where p.company_id = '$company_id' and p.date between '$sdate' and '$edate' order by p.id desc ")->result();
+        $payments = $this->db->query("select p.*,u.fullname from received as p left join alluser as u on p.user_id=u.id where p.date between '$sdate' and '$edate' order by p.id desc ")->result();
 
 
         header("Content-type: application/csv");
@@ -2184,8 +2065,6 @@ class Reports extends CI_Controller {
     }
 
     function export_salesreturn($sdate1,$edate1) {
-        $company_id = $this->session->userdata('company_id');
-        
         $sdate =  $sdate1. ' 00:00:00';
         $edate =  $edate1. ' 23:59:59';
         

@@ -18,15 +18,13 @@ class Payments extends CI_Controller {
 
     public function index() {
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'payments';
             $data['page_title'] = 'Payment Voucher';
-            
-            $comid = $this->session->userdata('company_id');
             $data['randomkey'] = time();
-            $data['getledger'] = $this->db->query("select a.*,d.name as district_name ,gn.name as  groupname  from accountledger as a left join districts as d on a.district=d.id left join accountgroup as gn on a.accountgroupid=gn.id where a.company_id= '$comid' and a.accountgroupid in(1,4,8,9,10,11,12,15,17,18,19,5) and a.status<>0 order by a.accountgroupid asc")->result();
-            $data['payments'] = $this->db->query("select p.*,u.fullname from payments as p left join alluser as u on p.user_id=u.id where p.company_id = '$comid' and p.date between '".date('Y-m-d 00:00:00')."' and '".date('Y-m-d 23:59:59')."' order by p.id desc")->result();
+            $data['getledger'] = $this->db->query("select a.*,d.name as district_name ,gn.name as  groupname  from accountledger as a left join districts as d on a.district=d.id left join accountgroup as gn on a.accountgroupid=gn.id where a.accountgroupid in(1,4,8,9,10,11,12,15,17,18,19,5) and a.status<>0 order by a.accountgroupid asc")->result();
+            $data['payments'] = $this->db->query("select p.*,u.fullname from payments as p left join alluser as u on p.user_id=u.id where p.date between '".date('Y-m-d 00:00:00')."' and '".date('Y-m-d 23:59:59')."' order by p.id desc")->result();
 
             $data['uncomlitelist'] = $this->db->query("select invoiceid,sum(amount) as tprice, count(ledgerid) as titem from temp_payment group by invoiceid order by invoiceid desc")->result();
             $data['currentlist']=array();
@@ -41,12 +39,11 @@ class Payments extends CI_Controller {
 
     public function temp_payment(){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'payments';
             $data['page_title'] = 'Payment Voucher';
             
-            $comid = $this->session->userdata('company_id');
             $invoiceid = $this->input->post('invoiceid');
             $ledgerid = $this->input->post('ledgerid');
             $amount = str_replace( ',', '', $this->input->post('amount'));
@@ -57,15 +54,14 @@ class Payments extends CI_Controller {
                 'invoiceid'=>$invoiceid,
                 'ledgerid'=>$ledgerid,
                 'amount'=>$amount,
-                'description'=>$description,
-                'company_id'=>$comid
+                'description'=>$description
             );
             $this->db->insert('temp_payment', $datar);
 
             $data['currentlist'] = $this->db->query("select tp.*,l.ledgername,l.address,l.accountgroupid,d.name as district_name  from temp_payment as tp left join accountledger as l on tp.ledgerid=l.id left join districts as d on l.district=d.id where tp.invoiceid='$invoiceid' order by tp.invoiceid desc")->result();
 
 
-            $data['getledger'] = $this->db->query("select a.*,d.name as district_name ,gn.name as  groupname  from accountledger as a left join districts as d on a.district=d.id left join accountgroup as gn on a.accountgroupid=gn.id where a.company_id= '$comid' and a.accountgroupid in(1,4,8,9,10,11,12,15,17,18,19,5) and a.status<>0 order by a.accountgroupid asc")->result();
+            $data['getledger'] = $this->db->query("select a.*,d.name as district_name ,gn.name as  groupname  from accountledger as a left join districts as d on a.district=d.id left join accountgroup as gn on a.accountgroupid=gn.id where a.accountgroupid in(1,4,8,9,10,11,12,15,17,18,19,5) and a.status<>0 order by a.accountgroupid asc")->result();
             $data['uncomlitelist'] = $this->db->query("select invoiceid,sum(amount) as tprice, count(ledgerid) as titem from temp_payment group by invoiceid order by invoiceid desc")->result();
  
             $data['payments'] = array();
@@ -76,7 +72,7 @@ class Payments extends CI_Controller {
     }
 
     function addpayments() {
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
 
             $comment =  $this->input->post('comment');
             $amount =  $this->input->post('amount');
@@ -92,7 +88,6 @@ class Payments extends CI_Controller {
                     'date' => $date,
                     'amount' => $amount[$i],
                     'description' => $comment[$i],
-                    'company_id' => $this->session->userdata('company_id'),
                     'user_id' => $this->session->userdata('user_id')
                 );
                 $this->db->insert('payments', $datalist);
@@ -107,8 +102,8 @@ class Payments extends CI_Controller {
                     'debit' => 0,
                     'credit' => $amount[$i],
                     'vouchertype' => 'Payment voucher',
-                    'description' => $comment[$i],
-                    'company_id' => $this->session->userdata('company_id')
+                    'description' => $comment[$i]
+                    
                 );
                 $this->db->insert('ledgerposting', $datalist);
 
@@ -119,8 +114,7 @@ class Payments extends CI_Controller {
                     'debit' => $amount[$i],
                     'credit' => 0,
                     'vouchertype' => 'Payment voucher',
-                    'description' => $comment[$i],
-                    'company_id' => $this->session->userdata('company_id')
+                    'description' => $comment[$i]
                 );
                 $this->db->insert('ledgerposting', $datalist2);
 
@@ -145,7 +139,7 @@ class Payments extends CI_Controller {
 
     function removedata(){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
            $id = $this->input->get('id');
            $randomkey = $this->input->get('randomkey');
 
@@ -153,19 +147,17 @@ class Payments extends CI_Controller {
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'payments';
             $data['page_title'] = 'Payment Voucher';
-            
-            $comid = $this->session->userdata('company_id');
 
             $data['randomkey']=$randomkey;
 
             $data['currentlist'] = $this->db->query("select tp.*,l.ledgername,l.address,l.accountgroupid,d.name as district_name  from temp_payment as tp left join accountledger as l on tp.ledgerid=l.id left join districts as d on l.district=d.id where tp.invoiceid='$randomkey' order by tp.id desc")->result();
 
 
-            $data['getledger'] = $this->db->query("select a.*,d.name as district_name ,gn.name as  groupname  from accountledger as a left join districts as d on a.district=d.id left join accountgroup as gn on a.accountgroupid=gn.id where a.company_id= '$comid' and a.accountgroupid in(1,4,8,9,10,11,12,15,17,18,19,5) and a.status<>0 order by a.accountgroupid asc")->result();
+            $data['getledger'] = $this->db->query("select a.*,d.name as district_name ,gn.name as  groupname  from accountledger as a left join districts as d on a.district=d.id left join accountgroup as gn on a.accountgroupid=gn.id where  a.accountgroupid in(1,4,8,9,10,11,12,15,17,18,19,5) and a.status<>0 order by a.accountgroupid asc")->result();
 
             $data['uncomlitelist'] = $this->db->query("select invoiceid,sum(amount) as tprice, count(ledgerid) as titem from temp_payment group by invoiceid order by invoiceid desc")->result();
  
-            $data['payments'] = $this->db->query("select p.*,u.fullname from payments as p left join alluser as u on p.user_id=u.id where p.company_id = '$comid' and p.date between '".date('Y-m-d 00:00:00')."' and '".date('Y-m-d 23:59:59')."' order by p.id desc")->result();
+            $data['payments'] = $this->db->query("select p.*,u.fullname from payments as p left join alluser as u on p.user_id=u.id where p.date between '".date('Y-m-d 00:00:00')."' and '".date('Y-m-d 23:59:59')."' order by p.id desc")->result();
 
             $this->load->view('payment_voucher', $data);
             else:
@@ -176,7 +168,7 @@ class Payments extends CI_Controller {
 
     function tempremove(){
         
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
         $randomkey = $this->input->get('randomkey');
         $this->db->query("DELETE FROM temp_payment WHERE invoiceid='$randomkey'");
             redirect('payments');
@@ -188,18 +180,16 @@ class Payments extends CI_Controller {
 
     function showtemp(){
         $data['baseurl'] = $this->config->item('base_url');
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'payments';
             $data['page_title'] = 'Payment Voucher';
-            
-            $comid = $this->session->userdata('company_id');
            
             $invoiceid=$data['randomkey']=$randomkey = $_GET['randomkey'];
             $data['currentlist'] = $this->db->query("select tp.*,l.ledgername,l.address,l.accountgroupid,d.name as district_name  from temp_payment as tp left join accountledger as l on tp.ledgerid=l.id left join districts as d on l.district=d.id where tp.invoiceid='$invoiceid' order by tp.invoiceid desc")->result();
 
 
-            $data['getledger'] = $this->db->query("select a.*,d.name as district_name ,gn.name as  groupname  from accountledger as a left join districts as d on a.district=d.id left join accountgroup as gn on a.accountgroupid=gn.id where a.company_id= '$comid' and a.accountgroupid in(1,4,8,9,10,11,12,15,17,18,19,5) and a.status<>0 order by a.accountgroupid asc")->result();
+            $data['getledger'] = $this->db->query("select a.*,d.name as district_name ,gn.name as  groupname  from accountledger as a left join districts as d on a.district=d.id left join accountgroup as gn on a.accountgroupid=gn.id where a.accountgroupid in(1,4,8,9,10,11,12,15,17,18,19,5) and a.status<>0 order by a.accountgroupid asc")->result();
             $data['uncomlitelist'] = $this->db->query("select invoiceid,sum(amount) as tprice, count(ledgerid) as titem from temp_payment group by invoiceid order by invoiceid desc")->result();
  
             $data['payments'] = array();
@@ -212,14 +202,12 @@ class Payments extends CI_Controller {
 
     function edit($id){
             $data['baseurl'] = $this->config->item('base_url');
-            if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+            if ($this->session->userdata('loggedin') == 'yes'):
             $data['activemenu'] = 'transection';
             $data['activesubmenu'] = 'payments';
             $data['page_title'] = 'Payment Voucher';
-            
-            $comid = $this->session->userdata('company_id');
 
-            $data['getledger'] = $this->db->query("select a.*,d.name as district_name ,gn.name as  groupname  from accountledger as a left join districts as d on a.district=d.id left join accountgroup as gn on a.accountgroupid=gn.id where a.company_id= '$comid' and a.accountgroupid in(1,4,8,9,10,11,12,15,17,18,19,5) and a.status<>0 order by a.accountgroupid asc")->result();
+            $data['getledger'] = $this->db->query("select a.*,d.name as district_name ,gn.name as  groupname  from accountledger as a left join districts as d on a.district=d.id left join accountgroup as gn on a.accountgroupid=gn.id where a.accountgroupid in(1,4,8,9,10,11,12,15,17,18,19,5) and a.status<>0 order by a.accountgroupid asc")->result();
 
             $item = $this->db->query("SELECT * from payments where id ='$id'")->row();
             $data['received_id'] = $id;
@@ -236,7 +224,7 @@ class Payments extends CI_Controller {
     }
 
     function update(){
-        if ($this->session->userdata('loggedin') == 'yes' && $this->session->userdata('company_id') != ''):
+        if ($this->session->userdata('loggedin') == 'yes'):
            $ledgerid =$this->input->post('ledgerid');
            $description =$this->input->post('description');
            $amount = str_replace( ',', '', $this->input->post('amount'));

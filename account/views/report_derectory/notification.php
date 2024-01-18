@@ -44,12 +44,6 @@
                                     <th>SN</th>
                                     <th>Name</th>
                                     <th>Product Id</th>
-                                    <?php if($this->session->userdata('fcategory')=='true'):?>
-                                        <th>Category</th>
-                                    <?php endif; if($this->session->userdata('fsubcategory')=='true'):?>
-                                        <th>Sub Category</th> 
-                                    <?php endif;?>                       
-
                                     <th>Available Quantity</th>
                                     <th>Warning Quantity</th>
                                     <th>Unit</th>
@@ -75,13 +69,7 @@
                                             <td><?php echo $i++; ?></td>    
                                             <td><?php echo $prodata->product_name; ?></td>
                                             <td><?php echo $prodata->product_id; ?></td>
-                                            <?php if($this->session->userdata('fcategory')=='true'):?>
-                                            <td><?php echo $prodata->category_name;?></td>
-                                            <?php endif; if($this->session->userdata('fsubcategory')=='true'):?>
-                                            <td><?php echo $prodata->sub_category;?></td>
-                                            <?php endif;?>  
-                                                                                          
-                                            <td><?php echo ($prodata->category_id==6)? number_format(($prodata->available_quantity),2)."|".number_format(($prodata->empty_cylinder),2):number_format(($prodata->available_quantity),2); ?></td>
+                                            <td><?php echo number_format(($prodata->available_quantity),2); ?></td>
                                             <td><?php echo number_format(($prodata->warning_quantity),2); ?></td>
                                             <td><?php echo $prodata->unit_name; ?></td>
                                                                                               

@@ -35,7 +35,7 @@
 
                         <div class="row">
                             <div class="col-md-12">
-                            <a style="float: left;" class="btn btn-danger" href="<?=$baseurl?>teacher/students_list/<?=$student->class_id;?>/#tr-<?=$student->roll;?>"><i class="fa fa-arrow-left"></i> পূর্ববর্তী পেজে ফিরে যান </a>
+                            <a style="float: left;" class="btn btn-danger" href="<?=$baseurl?>teacher/students_list/<?=$student->class_id;?>/#tr-<?=$student->id;?>"><i class="fa fa-arrow-left"></i> পূর্ববর্তী পেজে ফিরে যান </a>
                                 <span style="float: right"><a  class="btn btn-success" href="<?php echo $baseurl;?>teacher/add_student/"><i class="fa fa-plus"></i>&nbsp;নতুন তালেবে এলেম </a></span>
                                  <span style="float: right; margin-right: 20px;"><a href="#" data-toggle="modal" data-target="#addsupplier"><button class="btn btn-primary"><i class="fa fa-plus"></i>&nbsp;ফি ধার্য করুন</button></a></span>
                                 <span style="float: right; margin-right: 20px;"><a href="#" data-toggle="modal" data-target="#salesproduct"><button class="btn btn-primary"><i class="fa fa-plus"></i>&nbsp;বিক্রয় করুন</button></a></span>
@@ -103,7 +103,7 @@
                                     </table>                                  
                                     
                                     <div class="row col-sm-6 col-sm-push-5" style="margin-top: 20px;">
-                                        <a class="btn btn-danger" href="<?=$baseurl?>teacher/students_list/<?=$student->class_id;?>/#tr-<?=$student->roll;?>"><i class="fa fa-times"></i> বাতিল করুন </a>  
+                                        <a class="btn btn-danger" href="<?=$baseurl?>teacher/students_list/<?=$student->class_id;?>/#tr-<?=$student->id;?>"><i class="fa fa-times"></i> বাতিল করুন </a>  
 
                                         <button id="sbutton" type="submit" value="submit" name="submit" onclick="return confirm('আপনি কি <?=$student->name?> এর অ্যাকাউন্টে টাকা জমা করতে চাচ্ছেন !!')" class="btn btn-success">ফি জমা করুন</button> 
                                         

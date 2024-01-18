@@ -206,7 +206,7 @@
                                                     $demototal = 0;
                                                     $sn = 1;
                                                     #$ransellid = $randsellid;
-                                                    $selldata = $this->db->query("select s.*,p.product_name as name,p.unit as unit_id ,u.name as unit_name from tempsell as s left join products as p on s.product_id=p.id left join product_unit as u on p.unit=u.id  where randsellid='$randsellid' order by id asc")->result();
+                                                    $selldata = $this->db->query("select s.*,p.product_name as name,p.unit_id ,u.name as unit_name from tempsell as s left join products as p on s.product_id=p.id left join product_unit as u on p.unit_id=u.id  where randsellid='$randsellid' order by id asc")->result();
                                                     echo '<input type="hidden" id="productlistifempty" value="' . sizeof($selldata) . '" />';
                                                     if (sizeof($selldata) > 0) : $i = 0;
                                                         foreach ($selldata as $fsell) :
